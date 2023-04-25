@@ -3,7 +3,6 @@ This is a simple event management system that allows users to create, delete and
 
 ## User stories
 ### MVP:
-- As a user, I want to be able to log in system using email.
 - As a user, I want to be able to create an event.
 - As a user, I want to be able to delete an event.
 - As a user, I want to be able to update information about event.
@@ -16,12 +15,13 @@ This is a simple event management system that allows users to create, delete and
 - As a user, I want to be able to see who has accepted or declined an invitation.
 ### Stretch goals:
 - As a user, I want to have a nice looking web page.
+- As a user, I want to be able to log in system using email.
 - As a user, I want to have email notifications about coming events.
 - As a user, I want to have email notifications about new invitations.
 
 ## Development map(in priority order)
-1. Create a system, where user can log in using email.
-2. Create a system, where users can work with events using CRUD operations.
-3. Add to system RSPVs management.
-4. Create MVC.
+1. Create a system, where users can work with events using CRUD operations.
+2. Add to system RSPVs management.
+3. Create MVC.
+4. Create a system, where user can log in using email.
 5. Add email notifications.
