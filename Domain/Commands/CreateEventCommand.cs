@@ -2,8 +2,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Domain.Interfaces;
 using Domain.Models.Database;
-using Domain.Repositories;
 
 using MediatR;
 
@@ -26,16 +26,22 @@ namespace Domain.Commands
 
     public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, CreateEventResult>
     {
-        private readonly IRepository _repository;
+        // private readonly IRepository _repository;
 
-        public CreateEventCommandHandler(IRepository repository)
+        // public CreateEventCommandHandler(IRepository repository)
+        // {
+        //     _repository = repository;
+        // }
+        private readonly IRepositoryManager _repositoryManager;
+
+        public CreateEventCommandHandler(IRepositoryManager repositoryManager)
         {
-            _repository = repository;
+            _repositoryManager = repositoryManager;
         }
 
         public async Task<CreateEventResult> Handle(CreateEventCommand request, CancellationToken cancellationToken = default)
         {
-            UserDTO user = await _repository.GetUserByEmailOrCreateUser(request.OwnerEmail, cancellationToken);
+            UserDTO user = await _repositoryManager.User.GetUserByEmailOrCreateUser(request.OwnerEmail, cancellationToken);
             EventDTO newEvent = new()
             {
                 Id = Guid.NewGuid(),
@@ -47,7 +53,8 @@ namespace Domain.Commands
                 OwnerId = user.Id,
                 Status = 0
             };
-            string id = await _repository.CreateEvent(newEvent, cancellationToken);
+            string id = await _repositoryManager.Event.CreateEvent(newEvent, cancellationToken);
+            await _repositoryManager.SaveAsync(cancellationToken);
             return new CreateEventResult
             {
                 Id = id

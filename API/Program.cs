@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 using Domain.MapperProfiles;
+using Domain.Interfaces;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -25,7 +26,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
 builder.Services.AddMediatR(c => c.RegisterServicesFromAssemblies(typeof(CreateEventCommand).Assembly));
-builder.Services.AddScoped<IRepository, Repository>();
+// builder.Services.AddScoped<IRepository, Repository>();
+builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
 builder.Services.AddDbContext<EventManagementContext>(
     options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
