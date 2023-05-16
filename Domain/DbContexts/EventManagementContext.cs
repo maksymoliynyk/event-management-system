@@ -18,7 +18,10 @@ namespace Domain.DbContexts
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            _ = optionsBuilder.UseNpgsql("Host=localhost;Database=EventManagement;Username=postgres;Password=db_learn");
+            if (!optionsBuilder.IsConfigured)
+            {
+                _ = optionsBuilder.UseNpgsql("Host=localhost;Database=EventManagement;Username=postgres;Password=db_learn");
+            }
         }
     }
 }

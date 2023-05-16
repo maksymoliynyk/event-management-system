@@ -15,12 +15,6 @@ namespace Domain.Commands
     }
     public class CancelEventByIdCommandHandler : IRequestHandler<CancelEventByIdCommand>
     {
-        // private readonly IRepository _repository;
-
-        // public CancelEventByIdCommandHandler(IRepository repository)
-        // {
-        //     _repository = repository;
-        // }
         private readonly IRepositoryManager _repositoryManager;
 
         public CancelEventByIdCommandHandler(IRepositoryManager repositoryManager)

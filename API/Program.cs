@@ -1,17 +1,8 @@
-using AutoMapper;
-
-using Domain.Commands;
-using Domain.DbContexts;
-using Domain.Repositories;
-
 using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-using Domain.MapperProfiles;
-using Domain.Interfaces;
+using API.Extensions;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -22,21 +13,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// ToDo: Implement configuration
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
-builder.Services.AddMediatR(c => c.RegisterServicesFromAssemblies(typeof(CreateEventCommand).Assembly));
-// builder.Services.AddScoped<IRepository, Repository>();
-builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
-builder.Services.AddDbContext<EventManagementContext>(
-    options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
-);
-builder.Services.AddSingleton(_ =>
-    {
-        MapperConfiguration mc = new(cfg => cfg.AddProfile<EventProfile>());
-        return mc.CreateMapper();
-    }
-);
+// Extension Methods
+builder.Services.RegisterMediatR();
+builder.Services.RegisterRepositoryManager();
+builder.Services.ConfigureDbContext(builder.Configuration);
+builder.Services.ConfigureMapping();
 
 WebApplication app = builder.Build();
 

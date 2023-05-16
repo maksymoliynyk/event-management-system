@@ -7,6 +7,7 @@ namespace Domain.Interfaces
     {
         IEventRepository Event { get; }
         IUserRepository User { get; }
+        IRSPVRepository RSPV { get; }
         Task SaveAsync(CancellationToken cancellationToken = default);
     }
 }

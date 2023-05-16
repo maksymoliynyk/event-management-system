@@ -20,7 +20,7 @@ namespace Domain.Models.Database
         public string Description { get; set; }
         [Column("date")]
         [Required]
-        public DateTime Date { get; set; }
+        public DateTimeOffset Date { get; set; }
         [Column("duration")]
         [Required]
         public TimeSpan Duration { get; set; }
