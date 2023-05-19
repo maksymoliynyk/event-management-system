@@ -12,5 +12,6 @@ namespace Domain.Interfaces
         Task<UserDTO> GetUserByEmailOrCreateUser(string email, CancellationToken cancellationToken = default);
         Task<IEnumerable<EventDTO>> GetAllEventsCreatedByUser(string id, CancellationToken cancellationToken = default);
         Task<IEnumerable<EventDTO>> GetEventsCreatedByUserByCondition(string id, Func<EventDTO, bool> condition, CancellationToken cancellationToken = default);
+        Task<UserDTO> GetUserById(string id, CancellationToken cancellationToken = default);
     }
 }

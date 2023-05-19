@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Contracts.Models.Statuses;
 
 using Domain.DbContexts;
+using Domain.Exceptions;
 using Domain.Interfaces;
 using Domain.Models.Database;
 
@@ -22,9 +23,13 @@ namespace Domain.Repositories
         public async Task ChangeEventStatus(string id, EventStatus eventStatus, CancellationToken cancellationToken = default)
         {
             EventDTO eventToChange = await GetEventById(id, cancellationToken);
+            if (eventToChange.Status is 1 or 2)
+            {
+                throw new EventStatusException(EventStatusError.StatusCannotBeChanged, $"Event status cannot be changed");
+            }
             if (eventToChange.Status == (int)eventStatus)
             {
-                return;
+                throw new EventStatusException(EventStatusError.NewStatusCannotBeSameAsOldStatus, $"Event status is already {eventStatus}");
             }
             eventToChange.Status = (int)eventStatus;
             return;
@@ -39,10 +44,6 @@ namespace Domain.Repositories
         public async Task<EventDTO> DeleteEventById(string id, CancellationToken cancellationToken = default)
         {
             EventDTO eventToDelete = await _context.Events.FirstOrDefaultAsync(t => t.Id.ToString() == id, cancellationToken);
-            if (eventToDelete == null)
-            {
-                return null;
-            }
             _ = _context.Events.Remove(eventToDelete);
             return eventToDelete;
         }
@@ -53,6 +54,8 @@ namespace Domain.Repositories
                             .Include(t => t.Owner)
                             .FirstOrDefaultAsync(t => t.Id.ToString() == id, cancellationToken);
         }
+
+        //? This method is not used in the application, but it can be useful in future
 
         public async Task UpdateEvent(EventDTO updatedEvent, CancellationToken cancellationToken = default)
         {

@@ -29,7 +29,7 @@ namespace API.Extensions
                     MapperConfiguration mc = new(map =>
                     {
                         map.AddProfile<EventProfile>();
-                        map.AddProfile<RSPVProfile>();
+                        map.AddProfile<RSVPProfile>();
                     }
                     );
                     return mc.CreateMapper();

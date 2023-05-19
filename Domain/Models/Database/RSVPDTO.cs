@@ -8,7 +8,7 @@ namespace Domain.Models.Database
 {
     [Table("rsvps")]
     [Index(nameof(EventId), nameof(UserId), IsUnique = true)]
-    public class RSPVDTO
+    public class RSVPDTO
     {
         [Column("id")]
         [Key]

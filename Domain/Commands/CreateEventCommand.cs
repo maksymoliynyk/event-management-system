@@ -13,7 +13,7 @@ namespace Domain.Commands
     {
         public string Title { get; init; }
         public string Description { get; init; }
-        public DateTimeOffset Date { get; init; }
+        public DateTime Date { get; init; }
         public long Duration { get; init; }
         public string Location { get; init; }
         public string OwnerEmail { get; init; }

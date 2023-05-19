@@ -7,18 +7,16 @@ using MediatR;
 
 namespace Domain.Commands
 {
-    public class DeleteEventByIdCommand : IRequest
+    public class DeleteEventByIdCommand : IRequest<DeleteEventByIdResult>
     {
         public string Id { get; init; }
     }
-    public class DeleteEventByIdCommandHandler : IRequestHandler<DeleteEventByIdCommand>
+    public class DeleteEventByIdResult
     {
-        // private readonly IRepository _repository;
 
-        // public DeleteEventByIdCommandHandler(IRepository repository)
-        // {
-        //     _repository = repository;
-        // }
+    }
+    public class DeleteEventByIdCommandHandler : IRequestHandler<DeleteEventByIdCommand, DeleteEventByIdResult>
+    {
 
         private readonly IRepositoryManager _repositoryManager;
 
@@ -27,11 +25,11 @@ namespace Domain.Commands
             _repositoryManager = repositoryManager;
         }
 
-        public async Task Handle(DeleteEventByIdCommand request, CancellationToken cancellationToken)
+        public async Task<DeleteEventByIdResult> Handle(DeleteEventByIdCommand request, CancellationToken cancellationToken)
         {
             _ = await _repositoryManager.Event.DeleteEventById(request.Id, cancellationToken);
             await _repositoryManager.SaveAsync(cancellationToken);
-            return;
+            return new DeleteEventByIdResult();
         }
     }
 }

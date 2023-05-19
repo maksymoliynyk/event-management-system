@@ -8,7 +8,7 @@ namespace Domain.DbContexts
     {
         public DbSet<UserDTO> Users { get; set; }
         public DbSet<EventDTO> Events { get; set; }
-        public DbSet<RSPVDTO> RSPVs { get; set; }
+        public DbSet<RSVPDTO> RSPVs { get; set; }
 
         public EventManagementContext()
         {

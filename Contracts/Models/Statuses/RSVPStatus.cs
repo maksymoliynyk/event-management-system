@@ -1,6 +1,6 @@
 namespace Contracts.Models.Statuses
 {
-    public enum RSPVStatus
+    public enum RSVPStatus
     {
         Invited,
         Accepted,

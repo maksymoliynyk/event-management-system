@@ -19,6 +19,18 @@ This is a simple event management system that allows users to create, delete and
 - As a user, I want to have email notifications about coming events.
 - As a user, I want to have email notifications about new invitations.
 
+## Api Endpoints
+### Event
+- `POST /event` - create event.<!-- + -->
+- `GET /event/{id}` - get event by id.<!-- + -->
+- `DELETE /event/{id}` - delete event by id.<!-- + -->
+- `PATCH /event/{id}/cancel` - cancel event by id.<!-- + -->
+- `POST /event/{id}/rsvp` - invite user to event.<!-- + -->
+- `GET /event/{id}/rsvps` - get event's rspvs.
+### User
+- `GET /user/{id}/events` - get user's events.
+- `GET /user/{id}/events/history` - get user's history of events.
+- `GET /user/{id}/rsvps` - get user's rspvs.
 ## Development map(in priority order)
 1. Create a system, where users can work with events using CRUD operations.
 2. Add to system RSPVs management.

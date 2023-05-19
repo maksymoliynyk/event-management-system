@@ -6,11 +6,11 @@ using Domain.Models.Database;
 
 namespace Domain.MapperProfiles
 {
-    public class RSPVProfile : Profile
+    public class RSVPProfile : Profile
     {
-        public RSPVProfile()
+        public RSVPProfile()
         {
-            _ = CreateMap<RSPVDTO, RSPV>()
+            _ = CreateMap<RSVPDTO, RSVP>()
                 .ForMember(dest => dest.EventTitle,
                     src =>
                     {

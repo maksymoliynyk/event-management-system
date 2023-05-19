@@ -8,34 +8,34 @@ using MediatR;
 
 namespace Domain.Commands
 {
-    public class SendRSPVCommand : IRequest<SendRSPVResult>
+    public class SendRSVPCommand : IRequest<SendRSVPResult>
     {
         public string UserEmail { get; init; }
         public string EventId { get; init; }
     }
 
-    public class SendRSPVResult
+    public class SendRSVPResult
     {
-        public string RSPVId { get; init; }
+        public string RSVPId { get; init; }
     }
-    public class SendRSPVCommandHandler : IRequestHandler<SendRSPVCommand, SendRSPVResult>
+    public class SendRSVPCommandHandler : IRequestHandler<SendRSVPCommand, SendRSVPResult>
     {
         private readonly IRepositoryManager _repositoryManager;
 
-        public SendRSPVCommandHandler(IRepositoryManager repositoryManager)
+        public SendRSVPCommandHandler(IRepositoryManager repositoryManager)
         {
             _repositoryManager = repositoryManager;
         }
 
-        public async Task<SendRSPVResult> Handle(SendRSPVCommand request, CancellationToken cancellationToken)
+        public async Task<SendRSVPResult> Handle(SendRSVPCommand request, CancellationToken cancellationToken)
         {
             UserDTO user = await _repositoryManager.User.GetUserByEmailOrCreateUser(request.UserEmail, cancellationToken);
             EventDTO searchedEvent = await _repositoryManager.Event.GetEventById(request.EventId, cancellationToken);
-            string id = await _repositoryManager.RSPV.SendRSPVToUser(searchedEvent, user, cancellationToken);
+            RSVPDTO rsvp = await _repositoryManager.RSVP.SendRSVPToUser(searchedEvent, user, cancellationToken);
             await _repositoryManager.SaveAsync(cancellationToken);
-            return new SendRSPVResult
+            return new SendRSVPResult
             {
-                RSPVId = id
+                RSVPId = rsvp.Id.ToString()
             };
         }
     }

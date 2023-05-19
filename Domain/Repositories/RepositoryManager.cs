@@ -13,7 +13,7 @@ namespace Domain.Repositories
 
         private IUserRepository _userRepository;
         private IEventRepository _eventRepository;
-        private IRSPVRepository _rspvRepository;
+        private IRSVPRepository _rsvpRepository;
         public RepositoryManager(EventManagementContext context)
         {
             _context = context;
@@ -35,12 +35,12 @@ namespace Domain.Repositories
                 return _eventRepository;
             }
         }
-        public IRSPVRepository RSPV
+        public IRSVPRepository RSVP
         {
             get
             {
-                _rspvRepository ??= new RSPVRepository(_context);
-                return _rspvRepository;
+                _rsvpRepository ??= new RSVPRepository(_context);
+                return _rsvpRepository;
             }
         }
 

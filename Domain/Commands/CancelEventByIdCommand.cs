@@ -9,11 +9,15 @@ using MediatR;
 
 namespace Domain.Commands
 {
-    public class CancelEventByIdCommand : IRequest
+    public class CancelEventByIdCommand : IRequest<CancelEventByIdResult>
     {
         public string Id { get; init; }
     }
-    public class CancelEventByIdCommandHandler : IRequestHandler<CancelEventByIdCommand>
+    public class CancelEventByIdResult
+    {
+
+    }
+    public class CancelEventByIdCommandHandler : IRequestHandler<CancelEventByIdCommand, CancelEventByIdResult>
     {
         private readonly IRepositoryManager _repositoryManager;
 
@@ -22,11 +26,11 @@ namespace Domain.Commands
             _repositoryManager = repositoryManager;
         }
 
-        public async Task Handle(CancelEventByIdCommand request, CancellationToken cancellationToken)
+        public async Task<CancelEventByIdResult> Handle(CancelEventByIdCommand request, CancellationToken cancellationToken)
         {
             await _repositoryManager.Event.ChangeEventStatus(request.Id, EventStatus.Cancelled, cancellationToken);
             await _repositoryManager.SaveAsync(cancellationToken);
-            return;
+            return new CancelEventByIdResult();
         }
     }
 }

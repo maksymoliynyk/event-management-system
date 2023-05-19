@@ -28,6 +28,11 @@ namespace Domain.Repositories
                         .Where(t => t.OwnerId.ToString() == id)
                         .ToArrayAsync(cancellationToken);
         }
+        public async Task<IEnumerable<EventDTO>> GetEventsCreatedByUserByCondition(string id, Func<EventDTO, bool> condition, CancellationToken cancellationToken = default)
+        {
+            IEnumerable<EventDTO> users = await GetAllEventsCreatedByUser(id, cancellationToken);
+            return users.Where(condition).ToArray();
+        }
 
         public async Task<UserDTO> GetUserByEmailOrCreateUser(string email, CancellationToken cancellationToken = default)
         {
@@ -46,10 +51,10 @@ namespace Domain.Repositories
             _ = await _context.Users.AddAsync(user, cancellationToken);
             return user;
         }
-        public async Task<IEnumerable<EventDTO>> GetEventsCreatedByUserByCondition(string id, Func<EventDTO, bool> condition, CancellationToken cancellationToken = default)
+
+        public async Task<UserDTO> GetUserById(string id, CancellationToken cancellationToken = default)
         {
-            IEnumerable<EventDTO> users = await GetAllEventsCreatedByUser(id, cancellationToken);
-            return users.Where(condition).ToArray();
+            return await _context.Users.FirstOrDefaultAsync(user => user.Id.ToString() == id, cancellationToken);
         }
     }
 }
