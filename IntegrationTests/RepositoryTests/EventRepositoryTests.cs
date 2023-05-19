@@ -114,11 +114,11 @@ namespace IntegrationTests.RepositoryTests
             // Assert
             if (status == 0)
             {
-                action.ShouldThrow<EventStatusException>().EventStatusError.ShouldBe(EventStatusError.NewStatusCannotBeSameAsOldStatus);
+                action.ShouldThrow<EventStatusException>().Error.ShouldBe(EventStatusError.NewStatusCannotBeSameAsOldStatus);
             }
             else
             {
-                action.ShouldThrow<EventStatusException>().EventStatusError.ShouldBe(EventStatusError.StatusCannotBeChanged);
+                action.ShouldThrow<EventStatusException>().Error.ShouldBe(EventStatusError.StatusCannotBeChanged);
             }
             using EventManagementContext newContext = TestContext.GetEventManagementContext();
             ArrangeHelper.CleanUp(newContext, userDTO, eventToChange);
