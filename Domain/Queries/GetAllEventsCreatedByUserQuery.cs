@@ -15,7 +15,7 @@ namespace Domain.Queries
 {
     public class GetAllEventsCreatedByUserQuery : IRequest<GetAllEventsCreatedByUserResult>
     {
-        public string Id { get; init; }
+        public string UserName { get; init; }
     }
 
     public class GetAllEventsCreatedByUserResult
@@ -35,12 +35,10 @@ namespace Domain.Queries
 
         public async Task<GetAllEventsCreatedByUserResult> Handle(GetAllEventsCreatedByUserQuery request, CancellationToken cancellationToken)
         {
-            IEnumerable<EventDTO> eventsDTO = await _repositoryManager.User.GetAllEventsCreatedByUser(request.Id, cancellationToken);
+            UserDTO user = await _repositoryManager.User.GetUserByUsername(request.UserName, cancellationToken);
+            IEnumerable<EventDTO> eventsDTO = await _repositoryManager.Event.GetEventsByOwner(user.Id, cancellationToken);
             IEnumerable<Event> events = _mapper.Map<IEnumerable<Event>>(eventsDTO);
-            return new GetAllEventsCreatedByUserResult
-            {
-                Events = events
-            };
+            return new GetAllEventsCreatedByUserResult { Events = events };
         }
     }
 }

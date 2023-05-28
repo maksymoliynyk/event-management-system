@@ -6,13 +6,13 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 using Domain.Queries;
-using API.Filters;
-using Contracts.RequestModels;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -22,42 +22,38 @@ namespace API.Controllers
             _mediator = mediator;
         }
         /// <summary>
-        /// Get Id of user by email
+        /// Get info about user
         /// </summary>
-        /// <param name="emailRequest"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>User's id</returns>
         /// <response code="200">Returns the id of user</response>
         /// <response code="400">Bad request</response>
         /// <response code="404">User not found</response>
         /// <response code="500">Server error</response>
-        [HttpPost]
-        //* temporary solution for user controllers
-        public async Task<IActionResult> GetIdOfUserByEmail([FromBody] EmailRequest emailRequest, CancellationToken cancellationToken = default)
+        [HttpGet]
+        public async Task<IActionResult> GetInfoAboutUser(CancellationToken cancellationToken = default)
         {
-            GetIdOfUserByEmailQuery request = new()
+            GetInfoAboutUserQuery request = new()
             {
-                Email = emailRequest.Email
+                UserName = User.Identity.Name
             };
-            GetIdOfUserByEmailResult result = await _mediator.Send(request, cancellationToken);
-            return Ok(result.Id);
+            GetInfoAboutUserResult result = await _mediator.Send(request, cancellationToken);
+            return Ok(result);
         }
         /// <summary>
         /// Get history of created events
         /// </summary>
-        /// <param name="id">Id of user</param>
         /// <param name="cancellationToken"></param>
         /// <returns>List of all created by user events</returns>
         /// <response code="200">Returns the list of events</response>
         /// <response code="404">User not found</response>
         /// <response code="500">Server error</response>
-        [HttpGet("{id}/events/history")]
-        [TypeFilter(typeof(UserExistFilter))]
-        public async Task<IActionResult> GetHistoryOfCreatedEvents([FromRoute] string id, CancellationToken cancellationToken = default)
+        [HttpGet("events/history")]
+        public async Task<IActionResult> GetHistoryOfCreatedEvents(CancellationToken cancellationToken = default)
         {
             GetAllEventsCreatedByUserQuery request = new()
             {
-                Id = id
+                UserName = User.Identity.Name
             };
             GetAllEventsCreatedByUserResult result = await _mediator.Send(request, cancellationToken);
             return Ok(result.Events);
@@ -65,19 +61,17 @@ namespace API.Controllers
         /// <summary>
         /// Get events that will take place and created by user
         /// </summary>
-        /// <param name="id">User's id</param>
         /// <param name="cancellationToken"></param>
         /// <returns>List of events that will take place </returns>
         /// <response code="200">Returns the list of events</response>
         /// <response code="404">User not found</response>
         /// <response code="500">Server error</response>
-        [HttpGet("{id}/events")]
-        [TypeFilter(typeof(UserExistFilter))]
-        public async Task<IActionResult> GetEventsThatWillTakePlace([FromRoute] string id, CancellationToken cancellationToken = default)
+        [HttpGet("events")]
+        public async Task<IActionResult> GetEventsThatWillTakePlace(CancellationToken cancellationToken = default)
         {
             GetEventsCreatedByUserThatWillTakePlaceQuery request = new()
             {
-                Id = id
+                UserName = User.Identity.Name,
             };
             GetEventsCreatedByUserThatWillTakePlaceResult result = await _mediator.Send(request, cancellationToken);
             return Ok(result.Events);

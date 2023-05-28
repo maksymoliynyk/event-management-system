@@ -30,10 +30,13 @@ namespace Domain.Models.Database
         public string Location { get; set; }
         [Column("owner_id")]
         [Required]
-        public Guid OwnerId { get; set; }
+        public string OwnerId { get; set; }
         [ForeignKey(nameof(OwnerId))]
         public virtual UserDTO Owner { get; set; }
         [Column("status")]
         public int Status { get; set; }
+        [Column("is_public")]
+        [Required]
+        public bool IsPublic { get; set; }
     }
 }

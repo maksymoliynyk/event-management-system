@@ -16,7 +16,8 @@ namespace Domain.Commands
         public DateTime Date { get; init; }
         public long Duration { get; init; }
         public string Location { get; init; }
-        public string OwnerEmail { get; init; }
+        public bool IsPublic { get; init; }
+        public string UserName { get; init; }
     }
 
     public class CreateEventResult
@@ -35,7 +36,7 @@ namespace Domain.Commands
 
         public async Task<CreateEventResult> Handle(CreateEventCommand request, CancellationToken cancellationToken = default)
         {
-            UserDTO user = await _repositoryManager.User.GetUserByEmailOrCreateUser(request.OwnerEmail, cancellationToken);
+            string userId = _repositoryManager.User.GetUserByUsername(request.UserName, cancellationToken).Result.Id;
             EventDTO newEvent = new()
             {
                 Id = Guid.NewGuid(),
@@ -44,14 +45,15 @@ namespace Domain.Commands
                 Date = request.Date,
                 Duration = TimeSpan.FromSeconds(request.Duration),
                 Location = request.Location,
-                OwnerId = user.Id,
-                Status = 0
+                OwnerId = userId,
+                Status = 0,
+                IsPublic = request.IsPublic
             };
-            string id = await _repositoryManager.Event.CreateEvent(newEvent, cancellationToken);
+            string eventId = await _repositoryManager.Event.CreateEvent(newEvent, cancellationToken);
             await _repositoryManager.SaveAsync(cancellationToken);
             return new CreateEventResult
             {
-                Id = id
+                Id = eventId
             };
         }
     }

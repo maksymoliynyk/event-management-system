@@ -3,26 +3,34 @@ using System.Threading.Tasks;
 
 using Domain.DbContexts;
 using Domain.Interfaces;
+using Domain.Models.Database;
+using Domain.Services;
+
+using Microsoft.AspNetCore.Identity;
 
 namespace Domain.Repositories
 {
     public class RepositoryManager : IRepositoryManager
     {
         private readonly EventManagementContext _context;
+        private readonly TokenService _tokenService;
+        private readonly UserManager<UserDTO> _userManager;
 
 
         private IUserRepository _userRepository;
         private IEventRepository _eventRepository;
         private IRSVPRepository _rsvpRepository;
-        public RepositoryManager(EventManagementContext context)
+        public RepositoryManager(EventManagementContext context, TokenService tokenService, UserManager<UserDTO> userManager)
         {
             _context = context;
+            _tokenService = tokenService;
+            _userManager = userManager;
         }
         public IUserRepository User
         {
             get
             {
-                _userRepository ??= new UserRepository(_context);
+                _userRepository ??= new UserRepository(_tokenService, _userManager);
                 return _userRepository;
             }
         }

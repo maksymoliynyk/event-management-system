@@ -1,60 +1,50 @@
-using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Domain.DbContexts;
+using Domain.Exceptions;
 using Domain.Interfaces;
 using Domain.Models.Database;
+using Domain.Services;
 
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace Domain.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly EventManagementContext _context;
+        private readonly UserManager<UserDTO> _userManager;
+        private readonly TokenService _tokenService;
 
-        public UserRepository(EventManagementContext context)
+        public UserRepository(TokenService tokenService, UserManager<UserDTO> userManager)
         {
-            _context = context;
+            _tokenService = tokenService;
+            _userManager = userManager;
         }
 
-        public async Task<IEnumerable<EventDTO>> GetAllEventsCreatedByUser(string id, CancellationToken cancellationToken = default)
+        public async Task<UserDTO> GetUserByEmail(string email, CancellationToken cancellationToken = default)
         {
-            return await _context.Events
-                        .Include(t => t.Owner)
-                        .Where(t => t.OwnerId.ToString() == id)
-                        .ToArrayAsync(cancellationToken);
-        }
-        public async Task<IEnumerable<EventDTO>> GetEventsCreatedByUserByCondition(string id, Func<EventDTO, bool> condition, CancellationToken cancellationToken = default)
-        {
-            IEnumerable<EventDTO> users = await GetAllEventsCreatedByUser(id, cancellationToken);
-            return users.Where(condition).ToArray();
+            UserDTO result = await _userManager.FindByEmailAsync(email);
+            return result;
         }
 
-        public async Task<UserDTO> GetUserByEmailOrCreateUser(string email, CancellationToken cancellationToken = default)
+
+        public async Task<IdentityResult> RegisterUser(UserDTO userDTO, string password, CancellationToken cancellationToken = default)
         {
-            UserDTO user = await _context.Users.FirstOrDefaultAsync(user => user.Email == email, cancellationToken);
-            if (user != null)
-            {
-                return user;
-            }
-
-            user = new UserDTO
-            {
-                Id = Guid.NewGuid(),
-                Email = email
-            };
-
-            _ = await _context.Users.AddAsync(user, cancellationToken);
-            return user;
+            IdentityResult result = await _userManager.CreateAsync(userDTO, password);
+            return result;
+        }
+        public async Task<string> LoginUser(string email, string password, CancellationToken cancellationToken = default)
+        {
+            UserDTO user = await _userManager.FindByEmailAsync(email) ?? throw new LoginException(LoginExceptionError.UserNotFound, "User not found");
+            bool result = await _userManager.CheckPasswordAsync(user, password);
+            return result ? _tokenService.CreateToken(user) :
+                throw new LoginException(LoginExceptionError.PasswordIncorrect, "Password incorrect");
         }
 
-        public async Task<UserDTO> GetUserById(string id, CancellationToken cancellationToken = default)
+        public async Task<UserDTO> GetUserByUsername(string username, CancellationToken cancellationToken = default)
         {
-            return await _context.Users.FirstOrDefaultAsync(user => user.Id.ToString() == id, cancellationToken);
+            UserDTO result = await _userManager.FindByNameAsync(username);
+            return result;
         }
     }
 }

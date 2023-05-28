@@ -1,10 +1,10 @@
-using Domain.Commands;
+using Contracts.RequestModels;
 
 using FluentValidation;
 
 namespace API.Validators
 {
-    public class CreateEventValidator : AbstractValidator<CreateEventCommand>
+    public class CreateEventValidator : AbstractValidator<CreateEventRequest>
     {
         public CreateEventValidator()
         {
@@ -13,7 +13,7 @@ namespace API.Validators
             _ = RuleFor(x => x.Date).NotEmpty();
             _ = RuleFor(x => x.Duration).NotEmpty();
             _ = RuleFor(x => x.Location).Length(1, 100);
-            _ = RuleFor(x => x.OwnerEmail).EmailAddress();
+            _ = RuleFor(x => x.IsPublic).NotEmpty();
         }
     }
 }

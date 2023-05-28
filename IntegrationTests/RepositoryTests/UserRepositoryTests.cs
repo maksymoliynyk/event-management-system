@@ -2,127 +2,67 @@ using System.Threading.Tasks;
 
 using Domain.DbContexts;
 using Domain.Interfaces;
+using Domain.Models.Database;
 using Domain.Repositories;
+using Domain.Services;
 
 using Faker;
-using Shouldly;
-using Domain.Models.Database;
-using IntegrationTests.RepositoryTests.Helpers;
+
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using System;
+
+using Shouldly;
 
 namespace IntegrationTests.RepositoryTests
 {
-    public class UserRepositoryTests
+    public class UserRepositoryTests : System.IDisposable
     {
-        private readonly IRepositoryManager _repositoryManager;
+        private readonly UserManager<UserDTO> _userManager;
+        private readonly TokenService _tokenService;
+        private readonly EventManagementContext _context;
+        private readonly IUserRepository _userRepository;
+
         public UserRepositoryTests()
         {
-            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-            _repositoryManager = new RepositoryManager(TestContext.GetEventManagementContext());
-        }
-        [Fact]
-        public async Task GetUserByEmailOrCreateUserShouldReturnUserIfUserExists()
-        {
-            // Arrange
-
-            using EventManagementContext context = TestContext.GetEventManagementContext();
-            UserDTO newUser = ArrangeHelper.ArrangeUser(context);
-
-            // Act
-            UserDTO user = await _repositoryManager.User.GetUserByEmailOrCreateUser(newUser.Email, default);
-
-            // Assert
-            _ = user.ShouldNotBeNull();
-            user.Id.ShouldBe(newUser.Id);
-            user.Email.ShouldBe(newUser.Email);
-            using EventManagementContext newContext = TestContext.GetEventManagementContext();
-            ArrangeHelper.CleanUp(newContext, newUser);
+            _tokenService = new TokenService();
+            _context = CreateContext();
+            _userManager = new UserManager<UserDTO>(new UserStore<UserDTO>(_context), null, null, null, null, null, null, null, null);
+            _userRepository = new UserRepository(_tokenService, _userManager);
         }
 
         [Fact]
-        public async Task GetUserByEmailOrCreateUserShouldCreateUserIfUserDoesNotExist()
+        public async Task RegisterUserShouldReturnIdentityResult()
         {
             // Arrange
-            string email = Internet.Email();
+            UserDTO userDTO = new()
+            {
+                Email = Internet.Email(),
+                FirstName = Name.First(),
+                LastName = Name.Last(),
+                UserName = Internet.UserName()
+            };
+            string password = Lorem.GetFirstWord();
 
             // Act
-            UserDTO user = await _repositoryManager.User.GetUserByEmailOrCreateUser(email, default);
-            await _repositoryManager.SaveAsync(default);
+            IdentityResult result = await _userRepository.RegisterUser(userDTO, password, default);
 
             // Assert
-            _ = user.ShouldNotBeNull();
-            user.Email.ShouldBe(email);
-
-            using EventManagementContext context = TestContext.GetEventManagementContext();
-            UserDTO userFromDb = await context.Users.FirstOrDefaultAsync(t => t.Id == user.Id, default);
-            ArrangeHelper.CleanUp(context, userFromDb);
-            _ = userFromDb.ShouldNotBeNull();
-            userFromDb.Id.ShouldBe(user.Id);
-            userFromDb.Email.ShouldBe(user.Email);
+            _ = result.ShouldBeOfType<IdentityResult>();
+            result.Succeeded.ShouldBeTrue();
+            Dispose();
         }
-        [Fact]
-        public async Task GetUserByIdShouldReturnUser()
+
+        private static EventManagementContext CreateContext()
         {
-            // Arrange
-            using EventManagementContext context = TestContext.GetEventManagementContext();
-            UserDTO newUser = ArrangeHelper.ArrangeUser(context);
-
-            // Act
-            UserDTO user = await _repositoryManager.User.GetUserById(newUser.Id.ToString(), default);
-
-            // Assert
-            _ = user.ShouldNotBeNull();
-            user.Id.ShouldBe(newUser.Id);
-            user.Email.ShouldBe(newUser.Email);
-            using EventManagementContext newContext = TestContext.GetEventManagementContext();
-            ArrangeHelper.CleanUp(newContext, newUser);
+            return new EventManagementContext(new DbContextOptionsBuilder<EventManagementContext>()
+                            .UseNpgsql("Host=localhost;Database=EventManagement;Username=postgres;Password=db_learn")
+                            .Options);
         }
-        [Fact]
-        public async Task GetAllEventsCreatedByUserShouldReturnEvents()
+
+        public void Dispose()
         {
-            // Arrange
-            using EventManagementContext context = TestContext.GetEventManagementContext();
-            UserDTO newUser = ArrangeHelper.ArrangeUser(context);
-            EventDTO newEvent1 = ArrangeHelper.ArrangeEvent(context, newUser);
-            EventDTO newEvent2 = ArrangeHelper.ArrangeEvent(context, newUser);
-
-            // Act
-            IEnumerable<EventDTO> events = await _repositoryManager.User.GetAllEventsCreatedByUser(newUser.Id.ToString(), default);
-
-            // Assert
-            _ = events.ShouldNotBeNull();
-            events.Count().ShouldBe(2);
-            events.ShouldContain(x => x.Id == newEvent1.Id);
-            events.ShouldContain(x => x.Id == newEvent2.Id);
-            using EventManagementContext newContext = TestContext.GetEventManagementContext();
-            ArrangeHelper.CleanUp(newContext, newEvent1);
-            ArrangeHelper.CleanUp(newContext, newEvent2);
-            ArrangeHelper.CleanUp(newContext, newUser);
-        }
-        [Fact]
-        public async Task GetEventsCreatedByUserByConditionWillReturnEventsByCondition()
-        {
-            // Arrange
-            using EventManagementContext context = TestContext.GetEventManagementContext();
-            UserDTO newUser = ArrangeHelper.ArrangeUser(context);
-            EventDTO newEvent1 = ArrangeHelper.ArrangeEvent(context, newUser);
-            EventDTO newEvent2 = ArrangeHelper.ArrangeEventYesterday(context, newUser);
-
-            // Act
-            IEnumerable<EventDTO> events = await _repositoryManager.User.GetEventsCreatedByUserByCondition(newUser.Id.ToString(), x => (x.Date + x.Duration) > DateTime.Now, default);
-
-            // Assert
-            _ = events.ShouldNotBeNull();
-            events.Count().ShouldBe(1);
-            events.ShouldContain(x => x.Id == newEvent1.Id);
-            events.ShouldNotContain(x => x.Id == newEvent2.Id);
-            using EventManagementContext newContext = TestContext.GetEventManagementContext();
-            ArrangeHelper.CleanUp(newContext, newEvent1);
-            ArrangeHelper.CleanUp(newContext, newEvent2);
-            ArrangeHelper.CleanUp(newContext, newUser);
+            _context.Dispose();
         }
     }
 }

@@ -18,7 +18,7 @@ namespace Domain.Models.Database
         [ForeignKey(nameof(EventId))]
         public virtual EventDTO Event { get; set; }
         [Column("user_id")]
-        public Guid UserId { get; set; }
+        public string UserId { get; set; }
         [ForeignKey(nameof(UserId))]
         public virtual UserDTO User { get; set; }
         [Column("status")]

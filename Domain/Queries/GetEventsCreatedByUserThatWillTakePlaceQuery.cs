@@ -16,7 +16,7 @@ namespace Domain.Queries
 {
     public class GetEventsCreatedByUserThatWillTakePlaceQuery : IRequest<GetEventsCreatedByUserThatWillTakePlaceResult>
     {
-        public string Id { get; init; }
+        public string UserName { get; init; }
     }
 
     public class GetEventsCreatedByUserThatWillTakePlaceResult
@@ -36,9 +36,9 @@ namespace Domain.Queries
 
         public async Task<GetEventsCreatedByUserThatWillTakePlaceResult> Handle(GetEventsCreatedByUserThatWillTakePlaceQuery request, CancellationToken cancellationToken)
         {
-            IEnumerable<EventDTO> eventsDTO = await _repositoryManager.User.GetEventsCreatedByUserByCondition(request.Id,
-                t => (t.Status != 2) && (t.Status != 1) && (DateTimeOffset.Now < t.Date.Add(t.Duration))
-                , cancellationToken);
+            UserDTO user = await _repositoryManager.User.GetUserByUsername(request.UserName, cancellationToken);
+            IEnumerable<EventDTO> eventsDTO = await _repositoryManager.Event.GetEventsByOwnerByCondition(user.Id,
+                                                                                t => (t.Date + t.Duration) > DateTime.Now, cancellationToken);
             return new GetEventsCreatedByUserThatWillTakePlaceResult
             {
                 Events = _mapper.Map<IEnumerable<Event>>(eventsDTO)

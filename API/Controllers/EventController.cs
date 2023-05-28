@@ -10,6 +10,7 @@ using Domain.Queries;
 
 using MediatR;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -37,9 +38,20 @@ namespace API.Controllers
         /// <response code="500">Server error</response>
 
         [HttpPost]
-        public async Task<IActionResult> CreateEvent([FromBody] CreateEventCommand request, CancellationToken cancellationToken = default)
+        [Authorize]
+        public async Task<IActionResult> CreateEvent([FromBody] CreateEventRequest request, CancellationToken cancellationToken = default)
         {
-            CreateEventResult result = await _mediator.Send(request, cancellationToken);
+            CreateEventCommand command = new()
+            {
+                Title = request.Title,
+                Description = request.Description,
+                Date = request.Date,
+                Duration = request.Duration,
+                Location = request.Location,
+                IsPublic = request.IsPublic,
+                UserName = User.Identity.Name
+            };
+            CreateEventResult result = await _mediator.Send(command, cancellationToken);
             return Created($"{result.Id}", result);
         }
 
@@ -58,7 +70,8 @@ namespace API.Controllers
         {
             GetEventByIdQuery query = new()
             {
-                Id = id
+                Id = id,
+                UserName = User.Identity.Name
             };
             GetEventByIdResult result = await _mediator.Send(query, cancellationToken);
             return Ok(result.SearchedEvent);
@@ -74,11 +87,13 @@ namespace API.Controllers
         /// <response code="500">Server error</response>
         [HttpDelete("{id}")]
         [TypeFilter(typeof(EventExistFilter))]
+        [Authorize]
         public async Task<IActionResult> DeleteEventById([FromRoute] string id, CancellationToken cancellationToken = default)
         {
             DeleteEventByIdCommand command = new()
             {
-                Id = id
+                Id = id,
+                UserName = User.Identity.Name
             };
             _ = await _mediator.Send(command, cancellationToken);
             return NoContent();
@@ -95,11 +110,13 @@ namespace API.Controllers
         /// <response code="500">Server error</response>
         [HttpPatch("{id}/cancel")]
         [TypeFilter(typeof(EventExistFilter))]
+        [Authorize]
         public async Task<IActionResult> CancelEventById([FromRoute] string id, CancellationToken cancellationToken = default)
         {
             CancelEventByIdCommand command = new()
             {
-                Id = id
+                Id = id,
+                UserName = User.Identity.Name
             };
             _ = await _mediator.Send(command, cancellationToken);
             return NoContent();
@@ -117,10 +134,12 @@ namespace API.Controllers
         /// <response code="500">Server error</response>
         [HttpPost("{id}/rsvp")]
         [TypeFilter(typeof(EventExistFilter))]
+        [Authorize]
         public async Task<IActionResult> SendRSVP([FromBody] EmailRequest emailRequest, [FromRoute] string id, CancellationToken cancellationToken = default)
         {
             SendRSVPCommand request = new()
             {
+                UserName = User.Identity.Name,
                 UserEmail = emailRequest.Email,
                 EventId = id
             };
@@ -138,11 +157,13 @@ namespace API.Controllers
         /// <response code="500">Server error</response>
         [HttpGet("{id}/rsvps")]
         [TypeFilter(typeof(EventExistFilter))]
+        [Authorize]
         public async Task<IActionResult> GetRSVPsForEvent([FromRoute] string id, CancellationToken cancellationToken = default)
         {
             GetEventsRSVPQuery query = new()
             {
-                EventId = id
+                EventId = id,
+                UserName = User.Identity.Name
             };
             GetEventsRSVPResult result = await _mediator.Send(query, cancellationToken);
             return Ok(result.RSVPs);

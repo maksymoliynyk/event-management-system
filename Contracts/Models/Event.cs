@@ -14,5 +14,6 @@ namespace Contracts.Models
         public string Location { get; init; }
         public string OwnerEmail { get; init; }
         public EventStatus Status { get; init; }
+        public bool IsPublic { get; init; }
     }
 }

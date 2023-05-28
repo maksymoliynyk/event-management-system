@@ -29,6 +29,11 @@ namespace API.Filters
                     _ => throw new Exception(context.Exception.Message, context.Exception.InnerException)
                 };
             }
+
+            if (context.Exception is NoAccessException)
+            {
+                context.Result = new ForbidResult();
+            }
         }
     }
 }

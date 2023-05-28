@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -53,6 +56,23 @@ namespace Domain.Repositories
             return await _context.Events
                             .Include(t => t.Owner)
                             .FirstOrDefaultAsync(t => t.Id.ToString() == id, cancellationToken);
+        }
+
+        public Task<IEnumerable<EventDTO>> GetEventsByOwner(string userId, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(_context.Events
+                            .Include(t => t.Owner)
+                            .Where(t => t.OwnerId == userId)
+                            .AsEnumerable());
+        }
+
+        public Task<IEnumerable<EventDTO>> GetEventsByOwnerByCondition(string userId, Func<EventDTO, bool> condition, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(_context.Events
+                            .Include(t => t.Owner)
+                            .Where(t => t.OwnerId == userId)
+                            .Where(condition)
+                            .AsEnumerable());
         }
 
         //? This method is not used in the application, but it can be useful in future

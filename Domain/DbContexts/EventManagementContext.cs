@@ -1,12 +1,12 @@
 using Domain.Models.Database;
 
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Domain.DbContexts
 {
-    public class EventManagementContext : DbContext
+    public class EventManagementContext : IdentityDbContext<UserDTO>
     {
-        public DbSet<UserDTO> Users { get; set; }
         public DbSet<EventDTO> Events { get; set; }
         public DbSet<RSVPDTO> RSPVs { get; set; }
 
