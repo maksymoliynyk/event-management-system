@@ -28,9 +28,9 @@ This is a simple event management system that allows users to create, delete and
 - `POST /event/{id}/rsvp` - invite user to event.<!-- + -->
 - `GET /event/{id}/rsvps` - get event's rspvs.
 ### User
-- `GET /user/{id}/events` - get user's events.
-- `GET /user/{id}/events/history` - get user's history of events.
-- `GET /user/{id}/rsvps` - get user's rspvs.
+- `GET /user/events` - get user's events.
+- `GET /user/events/history` - get user's history of events.
+- `GET /user` - get user's info.
 ## Development map(in priority order)
 1. Create a system, where users can work with events using CRUD operations.
 2. Add to system RSPVs management.
