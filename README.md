@@ -20,6 +20,9 @@ This is a simple event management system that allows users to create, delete and
 - As a user, I want to have email notifications about new invitations.
 
 ## Api Endpoints
+### Auth
+- `POST /auth/register` - register user.<!-- + -->
+- `POST /auth/login` - login user.<!-- + -->
 ### Event
 - `POST /event` - create event.<!-- + -->
 - `GET /event/{id}` - get event by id.<!-- + -->
