@@ -24,9 +24,8 @@ namespace Domain.Migrations
 
             modelBuilder.Entity("Domain.Models.Database.EventDTO", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                    b.Property<string>("Id")
+                        .HasColumnType("text")
                         .HasColumnName("id");
 
                     b.Property<DateTime>("Date")
@@ -77,13 +76,12 @@ namespace Domain.Migrations
 
             modelBuilder.Entity("Domain.Models.Database.RSVPDTO", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                    b.Property<string>("Id")
+                        .HasColumnType("text")
                         .HasColumnName("id");
 
-                    b.Property<Guid>("EventId")
-                        .HasColumnType("uuid")
+                    b.Property<string>("EventId")
+                        .HasColumnType("text")
                         .HasColumnName("event_id");
 
                     b.Property<int>("Status")
@@ -321,9 +319,7 @@ namespace Domain.Migrations
                 {
                     b.HasOne("Domain.Models.Database.EventDTO", "Event")
                         .WithMany()
-                        .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("EventId");
 
                     b.HasOne("Domain.Models.Database.UserDTO", "User")
                         .WithMany()

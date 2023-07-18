@@ -5,9 +5,6 @@ using Microsoft.Extensions.Hosting;
 using API.Extensions;
 
 using Serilog;
-using FluentValidation.AspNetCore;
-using FluentValidation;
-using API.Validators;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -34,10 +31,7 @@ builder.Services.ConfigureMapping();
 builder.Services.ConfigureIdentity();
 builder.Services.ConfigureAuthentication(builder.Configuration);
 builder.Services.ConfigureAdditionalServices();
-
-
-builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddValidatorsFromAssemblyContaining<CreateEventValidator>();
+builder.Services.ConfigureValidation();
 
 WebApplication app = builder.Build();
 

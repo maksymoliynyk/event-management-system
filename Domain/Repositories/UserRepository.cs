@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 
 using Domain.Exceptions;
 using Domain.Interfaces;
+using Domain.Models;
 using Domain.Models.Database;
 using Domain.Services;
 
@@ -23,7 +24,7 @@ namespace Domain.Repositories
 
         public async Task<UserDTO> GetUserByEmail(string email, CancellationToken cancellationToken = default)
         {
-            UserDTO result = await _userManager.FindByEmailAsync(email);
+            UserDTO result = await _userManager.FindByEmailAsync(email) ?? throw new ObjectNotFoundException("User with this email doesn't exist", ObjectNotFoundErrors.User);
             return result;
         }
 
@@ -33,9 +34,9 @@ namespace Domain.Repositories
             IdentityResult result = await _userManager.CreateAsync(userDTO, password);
             return result;
         }
-        public async Task<string> LoginUser(string email, string password, CancellationToken cancellationToken = default)
+        public async Task<TokenModel> LoginUser(string email, string password, CancellationToken cancellationToken = default)
         {
-            UserDTO user = await _userManager.FindByEmailAsync(email) ?? throw new LoginException(LoginExceptionError.UserNotFound, "User not found");
+            UserDTO user = await GetUserByEmail(email, cancellationToken);
             bool result = await _userManager.CheckPasswordAsync(user, password);
             return result ? _tokenService.CreateToken(user) :
                 throw new LoginException(LoginExceptionError.PasswordIncorrect, "Password incorrect");
@@ -43,7 +44,7 @@ namespace Domain.Repositories
 
         public async Task<UserDTO> GetUserByUsername(string username, CancellationToken cancellationToken = default)
         {
-            UserDTO result = await _userManager.FindByNameAsync(username);
+            UserDTO result = await _userManager.FindByNameAsync(username) ?? throw new ObjectNotFoundException("User with this username doesn't exist", ObjectNotFoundErrors.User);
             return result;
         }
     }

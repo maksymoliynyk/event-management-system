@@ -5,6 +5,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
+using Domain.Models;
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
@@ -15,7 +17,7 @@ namespace Domain.Services
     public class TokenService
     {
         private const int ExpirationMinutes = 30;
-        public string CreateToken(IdentityUser user)
+        public virtual TokenModel CreateToken(IdentityUser user)
         {
             DateTime expiration = DateTime.UtcNow.AddMinutes(ExpirationMinutes);
             JwtSecurityToken token = CreateJwtToken(
@@ -24,7 +26,12 @@ namespace Domain.Services
                 expiration
             );
             JwtSecurityTokenHandler tokenHandler = new();
-            return tokenHandler.WriteToken(token);
+
+            return new TokenModel
+            {
+                Token = tokenHandler.WriteToken(token),
+                ExpiresIn = expiration
+            };
         }
 
         private static JwtSecurityToken CreateJwtToken(List<Claim> claims, SigningCredentials credentials,
@@ -45,10 +52,9 @@ namespace Domain.Services
             {
                 List<Claim> claims = new()
                 {
-                    new Claim(JwtRegisteredClaimNames.Sub, "TokenForTheApiWithAuth"),
+                    new Claim(JwtRegisteredClaimNames.Sub, user.Id),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                     new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString(CultureInfo.InvariantCulture)),
-                    new Claim(ClaimTypes.NameIdentifier, user.Id),
                     new Claim(ClaimTypes.Name, user.UserName),
                     new Claim(ClaimTypes.Email, user.Email)
                 };

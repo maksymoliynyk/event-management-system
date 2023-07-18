@@ -3,15 +3,22 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 
+using API.Validators;
+
 using AutoMapper;
 
-using Domain.Commands;
+using Contracts.RequestModels;
+
+using Domain.Commands.AuthCommands;
+using Domain.Commands.EventCommands;
 using Domain.DbContexts;
 using Domain.Interfaces;
 using Domain.MapperProfiles;
 using Domain.Models.Database;
 using Domain.Repositories;
 using Domain.Services;
+
+using FluentValidation;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -129,7 +136,6 @@ namespace API.Extensions
 
         public static void ConfigureAdditionalServices(this IServiceCollection services)
         {
-            _ = services.AddScoped<AccessChecker>();
             _ = services.AddScoped<TokenService>();
         }
 
@@ -139,6 +145,13 @@ namespace API.Extensions
                                 builder => _ = builder.AllowAnyOrigin()
                                         .AllowAnyHeader()
                                         .AllowAnyMethod()));
+        }
+        public static void ConfigureValidation(this IServiceCollection services)
+        {
+            _ = services.AddScoped<IValidator<CreateEventRequest>, CreateEventValidator>();
+            _ = services.AddScoped<IValidator<EmailRequest>, EmailRequestValidator>();
+            _ = services.AddScoped<IValidator<LoginUserCommand>, LoginUserValidator>();
+            _ = services.AddScoped<IValidator<RegisterUserCommand>, RegisterUserValidator>();
         }
     }
 }

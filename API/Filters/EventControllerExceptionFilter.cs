@@ -3,36 +3,27 @@ using Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-using System;
-
 namespace API.Filters
 {
     public class EventControllerExceptionFilter : IExceptionFilter
     {
         public void OnException(ExceptionContext context)
         {
-            if (context.Exception is EventStatusException eventStatusException)
+            if (context.Exception is ObjectStatusException eventStatusException)
             {
-                context.Result = eventStatusException.Error switch
-                {
-                    EventStatusError.StatusCannotBeChanged => new BadRequestObjectResult(new { message = eventStatusException.Message }),
-                    EventStatusError.NewStatusCannotBeSameAsOldStatus => new BadRequestObjectResult(new { message = eventStatusException.Message }),
-                    _ => throw new Exception(context.Exception.Message, context.Exception.InnerException)
-                };
+                context.Result = new BadRequestObjectResult(new { error = eventStatusException.Error, message = eventStatusException.Message });
             }
             if (context.Exception is RSPVSendException rSPVSendException)
             {
-                context.Result = rSPVSendException.Error switch
-                {
-                    RSPVSendExceptionError.UserIsOwner => new BadRequestObjectResult(new { message = rSPVSendException.Message }),
-                    RSPVSendExceptionError.UserAlreadyRSVPd => new BadRequestObjectResult(new { message = rSPVSendException.Message }),
-                    _ => throw new Exception(context.Exception.Message, context.Exception.InnerException)
-                };
+                context.Result = new BadRequestObjectResult(new { error = rSPVSendException.Error, message = rSPVSendException.Message });
             }
-
             if (context.Exception is NoAccessException)
             {
                 context.Result = new ForbidResult();
+            }
+            if (context.Exception is ObjectNotFoundException objectNotFoundException)
+            {
+                context.Result = new NotFoundObjectResult(new { error = objectNotFoundException.Error, message = context.Exception.Message });
             }
         }
     }

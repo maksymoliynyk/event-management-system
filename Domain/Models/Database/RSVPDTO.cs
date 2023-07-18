@@ -12,9 +12,9 @@ namespace Domain.Models.Database
     {
         [Column("id")]
         [Key]
-        public Guid Id { get; set; }
+        public string Id { get; set; }
         [Column("event_id")]
-        public Guid EventId { get; set; }
+        public string EventId { get; set; }
         [ForeignKey(nameof(EventId))]
         public virtual EventDTO Event { get; set; }
         [Column("user_id")]

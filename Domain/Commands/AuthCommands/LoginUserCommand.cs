@@ -1,8 +1,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using Domain.Exceptions;
 using Domain.Interfaces;
+using Domain.Models;
 
 using MediatR;
 
@@ -16,8 +16,7 @@ namespace Domain.Commands.AuthCommands
 
     public class LoginUserResult
     {
-        public string Token { get; init; }
-        public LoginException Error { get; init; }
+        public TokenModel Token { get; init; }
 
     }
     public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, LoginUserResult>
@@ -31,17 +30,9 @@ namespace Domain.Commands.AuthCommands
 
         public async Task<LoginUserResult> Handle(LoginUserCommand request, CancellationToken cancellationToken)
         {
-            try
-            {
-                string result = await _repositoryManager.User.LoginUser(request.Email, request.Password, cancellationToken);
-                await _repositoryManager.SaveAsync(cancellationToken);
-                return new LoginUserResult { Token = result };
-            }
-            catch (LoginException e)
-            {
-                return new LoginUserResult { Error = e };
-            }
-
+            TokenModel result = await _repositoryManager.User.LoginUser(request.Email, request.Password, cancellationToken);
+            await _repositoryManager.SaveAsync(cancellationToken);
+            return new LoginUserResult { Token = result };
         }
     }
 }

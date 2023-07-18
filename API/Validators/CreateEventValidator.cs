@@ -11,9 +11,9 @@ namespace API.Validators
             _ = RuleFor(x => x.Title).Length(1, 100);
             _ = RuleFor(x => x.Description).Length(1, 500);
             _ = RuleFor(x => x.Date).NotEmpty();
-            _ = RuleFor(x => x.Duration).NotEmpty();
+            _ = RuleFor(x => x.Duration).NotEmpty().GreaterThan(1);
             _ = RuleFor(x => x.Location).Length(1, 100);
-            _ = RuleFor(x => x.IsPublic).NotEmpty();
+            _ = RuleFor(x => x.IsPublic).NotNull();
         }
     }
 }

@@ -1,3 +1,5 @@
+using System;
+
 using Domain.Models.Database;
 
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -12,9 +14,11 @@ namespace Domain.DbContexts
 
         public EventManagementContext()
         {
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
         }
         public EventManagementContext(DbContextOptions<EventManagementContext> options) : base(options)
         {
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

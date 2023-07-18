@@ -4,9 +4,12 @@ using System.Threading.Tasks;
 using MediatR;
 
 using Microsoft.AspNetCore.Mvc;
-
-using Domain.Queries;
 using Microsoft.AspNetCore.Authorization;
+using Domain.Queries.UserQueries;
+using API.Extensions;
+using Domain.Queries.RSVPQueries;
+using System.Linq;
+using Contracts.Models;
 
 namespace API.Controllers
 {
@@ -41,24 +44,6 @@ namespace API.Controllers
             return Ok(result);
         }
         /// <summary>
-        /// Get history of created events
-        /// </summary>
-        /// <param name="cancellationToken"></param>
-        /// <returns>List of all created by user events</returns>
-        /// <response code="200">Returns the list of events</response>
-        /// <response code="404">User not found</response>
-        /// <response code="500">Server error</response>
-        [HttpGet("events/history")]
-        public async Task<IActionResult> GetHistoryOfCreatedEvents(CancellationToken cancellationToken = default)
-        {
-            GetAllEventsCreatedByUserQuery request = new()
-            {
-                UserName = User.Identity.Name
-            };
-            GetAllEventsCreatedByUserResult result = await _mediator.Send(request, cancellationToken);
-            return Ok(result.Events);
-        }
-        /// <summary>
         /// Get events that will take place and created by user
         /// </summary>
         /// <param name="cancellationToken"></param>
@@ -66,15 +51,38 @@ namespace API.Controllers
         /// <response code="200">Returns the list of events</response>
         /// <response code="404">User not found</response>
         /// <response code="500">Server error</response>
-        [HttpGet("events")]
-        public async Task<IActionResult> GetEventsThatWillTakePlace(CancellationToken cancellationToken = default)
+        [HttpGet("events/created")]
+        public async Task<IActionResult> GetEventsThatCreatedByUser(CancellationToken cancellationToken = default)
         {
-            GetEventsCreatedByUserThatWillTakePlaceQuery request = new()
+            GetAllEventsCreatedByUserQuery request = new()
             {
-                UserName = User.Identity.Name,
+                UserId = User.GetUserIdFromJWT(),
             };
-            GetEventsCreatedByUserThatWillTakePlaceResult result = await _mediator.Send(request, cancellationToken);
-            return Ok(result.Events);
+            GetAllEventsCreatedByUserResult result = await _mediator.Send(request, cancellationToken);
+            return result.Events.Equals(Enumerable.Empty<Event>()) ? NoContent() : Ok(result.Events);
+        }
+
+        [HttpGet("events/participated")]
+        [Authorize]
+        public async Task<IActionResult> GetAllEventsWhereUserAreParticipate(CancellationToken cancellationToken = default)
+        {
+            GetAllEventsWhereUserAreParticipateQuery query = new()
+            {
+                UserId = User.GetUserIdFromJWT()
+            };
+            GetAllEventsWhereUserAreParticipateResult result = await _mediator.Send(query, cancellationToken);
+            return result.Events.Equals(Enumerable.Empty<Event>()) ? NoContent() : Ok(result.Events);
+        }
+        [HttpGet("rsvps")]
+        [Authorize]
+        public async Task<IActionResult> GetAllUsersRSVPs(CancellationToken cancellationToken = default)
+        {
+            GetUsersRSVPQuery query = new()
+            {
+                UserId = User.GetUserIdFromJWT()
+            };
+            GetUsersRSVPResult result = await _mediator.Send(query, cancellationToken);
+            return result.RSVPs.Equals(Enumerable.Empty<RSVP>()) ? NoContent() : Ok(result.RSVPs);
         }
     }
 }
