@@ -24,5 +24,8 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore
+    - name: Verify project file path
+      run: ls -al ./UnitTests
     - name: Test
-      run: dotnet test .\UnitTests\UnitTests.csproj --no-build --verbosity normal
+      working-directory: ./UnitTests
+      run: dotnet test UnitTests.csproj --no-build --verbosity normal
