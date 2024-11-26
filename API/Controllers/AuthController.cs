@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using API.Extensions;
 using API.Filters;
 
-using Domain.Commands.AuthCommands;
+using Application.Commands.AuthCommands;
 
 using FluentValidation;
 using FluentValidation.Results;

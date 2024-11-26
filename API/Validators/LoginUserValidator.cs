@@ -1,4 +1,4 @@
-using Domain.Commands.AuthCommands;
+using Application.Commands.AuthCommands;
 
 using FluentValidation;
 

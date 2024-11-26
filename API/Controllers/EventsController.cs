@@ -6,11 +6,6 @@ using API.Extensions;
 
 using Contracts.RequestModels;
 
-using Domain.Commands.EventCommands;
-using Domain.Commands.RSVPCommands;
-using Domain.Queries.EventQueries;
-using Domain.Queries.RSVPQueries;
-
 using MediatR;
 
 using Microsoft.AspNetCore.Authorization;
@@ -19,6 +14,10 @@ using FluentValidation;
 using FluentValidation.Results;
 using System.Linq;
 using Contracts.Models;
+using Application.Commands.EventCommands;
+using Application.Queries.EventQueries;
+using Application.Commands.RSVPCommands;
+using Application.Queries.RSVPQueries;
 
 namespace API.Controllers
 {

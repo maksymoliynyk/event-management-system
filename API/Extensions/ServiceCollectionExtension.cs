@@ -5,24 +5,17 @@ using System.Text;
 
 using API.Validators;
 
+using Application.Commands.AuthCommands;
+using Application.Commands.EventCommands;
+using Application.MapperProfiles;
+
 using AutoMapper;
 
 using Contracts.RequestModels;
 
-using Domain.Commands.AuthCommands;
-using Domain.Commands.EventCommands;
-using Domain.DbContexts;
-using Domain.Interfaces;
-using Domain.MapperProfiles;
-using Domain.Models.Database;
-using Domain.Repositories;
-using Domain.Services;
-
 using FluentValidation;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -35,10 +28,6 @@ namespace API.Extensions
         public static void RegisterMediatR(this IServiceCollection services)
         {
             _ = services.AddMediatR(c => c.RegisterServicesFromAssemblies(typeof(CreateEventCommand).Assembly));
-        }
-        public static void RegisterRepositoryManager(this IServiceCollection services)
-        {
-            _ = services.AddScoped<IRepositoryManager, RepositoryManager>();
         }
         public static void ConfigureMapping(this IServiceCollection services)
         {
@@ -53,12 +42,6 @@ namespace API.Extensions
                     );
                     return mc.CreateMapper();
                 });
-        }
-        public static void ConfigureDbContext(this IServiceCollection services, IConfiguration configuration)
-        {
-            _ = services.AddDbContext<EventManagementContext>(
-                options => options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
-            );
         }
 
         public static void ConfigureSwagger(this IServiceCollection services)
@@ -98,45 +81,6 @@ namespace API.Extensions
                                         });
                     }
                 );
-        }
-        public static void ConfigureIdentity(this IServiceCollection services)
-        {
-            _ = services.AddIdentityCore<UserDTO>(options =>
-            {
-                options.SignIn.RequireConfirmedAccount = false;
-                options.User.RequireUniqueEmail = true;
-                options.Password.RequireDigit = false;
-                options.Password.RequiredLength = 6;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequireLowercase = false;
-            })
-                .AddEntityFrameworkStores<EventManagementContext>()
-                .AddDefaultTokenProviders();
-        }
-
-        public static void ConfigureAuthentication(this IServiceCollection services, IConfiguration configuration)
-        {
-            _ = services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(
-                    options => options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ClockSkew = TimeSpan.Zero,
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = "apiWithAuthBackend",
-                        ValidAudience = "apiWithAuthBackend",
-                        IssuerSigningKey = new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(configuration["Authentication:SecretKey"])
-                            )
-                    });
-        }
-
-        public static void ConfigureAdditionalServices(this IServiceCollection services)
-        {
-            _ = services.AddScoped<TokenService>();
         }
 
         public static void ConfigureCORS(this IServiceCollection services)

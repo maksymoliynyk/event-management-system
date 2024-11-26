@@ -3,11 +3,13 @@ using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Domain.DbContexts;
+using Domain.Aggregates.Events;
+using Domain.Aggregates.Users;
 using Domain.Interfaces;
 using Domain.Models.Database;
-using Domain.Repositories;
 using Domain.Services;
+
+using Infrastructure;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -23,10 +25,7 @@ namespace IntegrationTests.Repository
         private readonly DbContextOptions<EventManagementContext> _dbContextOptions;
         private readonly EventManagementContext _dbContext;
         private readonly UserManager<UserDTO> _userManager;
-        private readonly IUserRepository _userRepository;
-        private readonly IEventRepository _eventRepository;
-        private readonly IRSVPRepository _rSVPRepository;
-        private readonly IRepositoryManager _repositoryManager;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly UserDTO _testUser;
         private readonly string _userPassword;
         private readonly Mock<TokenService> _tokenServiceMock;
@@ -39,10 +38,7 @@ namespace IntegrationTests.Repository
             _dbContext = CreateDbContext();
             _userManager = CreateUserManager();
             _tokenServiceMock = new Mock<TokenService>();
-            _userRepository = new UserRepository(_tokenServiceMock.Object, _userManager);
-            _eventRepository = new EventRepository(_dbContext);
-            _rSVPRepository = new RSVPRepository(_dbContext);
-            _repositoryManager = new RepositoryManager(_dbContext, _tokenServiceMock.Object, _userManager);
+            _unitOfWork = new UnitOfWork(_dbContext, _tokenServiceMock.Object, _userManager);
             _testUser = new UserDTO
             {
                 Email = Internet.Email(),
@@ -75,7 +71,7 @@ namespace IntegrationTests.Repository
             };
             _ = await _dbContext.Events.AddAsync(newEvent, CancellationToken.None);
             // Act
-            await _repositoryManager.SaveAsync(CancellationToken.None);
+            await _unitOfWork.SaveAsync(CancellationToken.None);
             // Assert
             Assert.NotNull(await _dbContext.Events.FirstOrDefaultAsync(x => x.Id == newEvent.Id));
             _ = _dbContext.Events.Remove(newEvent);
@@ -87,7 +83,7 @@ namespace IntegrationTests.Repository
             // Arrange
 
             // Act
-            IRSVPRepository rsvpRepository = _repositoryManager.RSVP;
+            IRSVPRepository rsvpRepository = _unitOfWork.RSVP;
 
             // Assert
             Assert.NotNull(rsvpRepository);
@@ -99,7 +95,7 @@ namespace IntegrationTests.Repository
             // Arrange
 
             // Act
-            IEventRepository eventRepository = _repositoryManager.Event;
+            IEventRepository eventRepository = _unitOfWork.Event;
 
             // Assert
             Assert.NotNull(eventRepository);
@@ -111,7 +107,7 @@ namespace IntegrationTests.Repository
             // Arrange
 
             // Act
-            IUserRepository userRepository = _repositoryManager.User;
+            IUserRepository userRepository = _unitOfWork.User;
 
             // Assert
             Assert.NotNull(userRepository);

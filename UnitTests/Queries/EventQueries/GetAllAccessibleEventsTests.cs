@@ -2,13 +2,15 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Application.Queries.EventQueries;
+
 using AutoMapper;
 
 using Contracts.Models;
 
-using Domain.Interfaces;
-using Domain.Models.Database;
-using Domain.Queries.EventQueries;
+using Domain.Aggregates.Events;
+
+using Infrastructure;
 
 using Moq;
 
@@ -16,16 +18,16 @@ namespace UnitTests.Queries.EventQueries
 {
     public class GetAllAccessibleEventsQueryTests
     {
-        private readonly Mock<IRepositoryManager> _repositoryManagerMock;
+        private readonly Mock<IUnitOfWork> _unitOfWorkMock;
         private readonly Mock<IMapper> _mapperMock;
         private readonly GetAllAccessibleEventsHandler _handler;
 
         public GetAllAccessibleEventsQueryTests()
         {
-            _repositoryManagerMock = new Mock<IRepositoryManager>();
+            _unitOfWorkMock = new Mock<IUnitOfWork>();
             _mapperMock = new Mock<IMapper>();
 
-            _handler = new GetAllAccessibleEventsHandler(_repositoryManagerMock.Object, _mapperMock.Object);
+            _handler = new GetAllAccessibleEventsHandler(_unitOfWorkMock.Object, _mapperMock.Object);
         }
 
         [Fact]
@@ -51,7 +53,7 @@ namespace UnitTests.Queries.EventQueries
                 new Event { Id = "event3", Title = "Event 3" }
             };
 
-            _ = _repositoryManagerMock.Setup(r => r.Event.GetAllEvents(query.UserId, CancellationToken.None))
+            _ = _unitOfWorkMock.Setup(r => r.Event.GetAllEvents(query.UserId, CancellationToken.None))
                                       .ReturnsAsync(eventDtos);
 
             _ = _mapperMock.Setup(m => m.Map<IEnumerable<Event>>(eventDtos))

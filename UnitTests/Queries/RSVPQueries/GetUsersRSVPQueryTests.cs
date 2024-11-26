@@ -2,13 +2,15 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Application.Queries.RSVPQueries;
+
 using AutoMapper;
 
 using Contracts.Models;
 
-using Domain.Interfaces;
-using Domain.Models.Database;
-using Domain.Queries.RSVPQueries;
+using Domain.Aggregates.Events;
+
+using Infrastructure;
 
 using Moq;
 
@@ -16,16 +18,16 @@ namespace UnitTests.Queries.RSVPQueries
 {
     public class GetUsersRSVPQueryTests
     {
-        private readonly Mock<IRepositoryManager> _repositoryManagerMock;
+        private readonly Mock<IUnitOfWork> _unitOfWorkMock;
         private readonly Mock<IMapper> _mapperMock;
         private readonly GetUsersRSVPHandler _handler;
 
         public GetUsersRSVPQueryTests()
         {
-            _repositoryManagerMock = new Mock<IRepositoryManager>();
+            _unitOfWorkMock = new Mock<IUnitOfWork>();
             _mapperMock = new Mock<IMapper>();
 
-            _handler = new GetUsersRSVPHandler(_repositoryManagerMock.Object, _mapperMock.Object);
+            _handler = new GetUsersRSVPHandler(_unitOfWorkMock.Object, _mapperMock.Object);
         }
 
         [Fact]
@@ -51,7 +53,7 @@ namespace UnitTests.Queries.RSVPQueries
                 new RSVP { Id = "rsvp3", UserEmail = "user123", EventTitle = "event3" }
             };
 
-            _ = _repositoryManagerMock.Setup(r => r.RSVP.GetAllRSVPsForUser(query.UserId, CancellationToken.None))
+            _ = _unitOfWorkMock.Setup(r => r.RSVP.GetAllRSVPsForUser(query.UserId, CancellationToken.None))
                                       .ReturnsAsync(rsvpDtos);
 
             _ = _mapperMock.Setup(m => m.Map<IEnumerable<RSVP>>(rsvpDtos))

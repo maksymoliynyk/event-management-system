@@ -4,6 +4,8 @@ using Microsoft.Extensions.Hosting;
 
 using API.Extensions;
 
+using Infrastructure.DependencyInjection;
+
 using Serilog;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -25,15 +27,14 @@ builder.Services.AddRouting(options => options.LowercaseUrls = true);
 //* Extension Methods
 builder.Services.ConfigureCORS();
 builder.Services.RegisterMediatR();
-builder.Services.RegisterRepositoryManager();
-builder.Services.ConfigureDbContext(builder.Configuration);
 builder.Services.ConfigureMapping();
-builder.Services.ConfigureIdentity();
-builder.Services.ConfigureAuthentication(builder.Configuration);
-builder.Services.ConfigureAdditionalServices();
 builder.Services.ConfigureValidation();
 
-WebApplication app = builder.Build();
+builder.Services.AddCustomOptions()
+    .AddIdentity(builder.Configuration)
+    .AddInfrastructure(builder.Configuration);
+
+var app = builder.Build();
 
 app.UseSerilogRequestLogging();
 

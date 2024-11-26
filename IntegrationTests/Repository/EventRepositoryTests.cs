@@ -5,13 +5,13 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Contracts.Models.Statuses;
-
-using Domain.DbContexts;
+using Domain.Aggregates.Events;
+using Domain.Enums;
 using Domain.Exceptions;
-using Domain.Interfaces;
 using Domain.Models.Database;
-using Domain.Repositories;
+
+using Infrastructure;
+using Infrastructure.Repositories;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;

@@ -1,14 +1,16 @@
 using System.Threading;
 using System.Threading.Tasks;
 
+using Application.Queries.EventQueries;
+
 using AutoMapper;
 
 using Contracts.Models;
 
+using Domain.Aggregates.Events;
 using Domain.Exceptions;
-using Domain.Interfaces;
-using Domain.Models.Database;
-using Domain.Queries.EventQueries;
+
+using Infrastructure;
 
 using Moq;
 
@@ -16,16 +18,16 @@ namespace UnitTests.Queries.EventQueries
 {
     public class GetEventByIdQueryTests
     {
-        private readonly Mock<IRepositoryManager> _repositoryManagerMock;
+        private readonly Mock<IUnitOfWork> _unitOfWorkMock;
         private readonly Mock<IMapper> _mapperMock;
         private readonly GetEventByIdQueryHandler _handler;
 
         public GetEventByIdQueryTests()
         {
-            _repositoryManagerMock = new Mock<IRepositoryManager>();
+            _unitOfWorkMock = new Mock<IUnitOfWork>();
             _mapperMock = new Mock<IMapper>();
 
-            _handler = new GetEventByIdQueryHandler(_repositoryManagerMock.Object, _mapperMock.Object);
+            _handler = new GetEventByIdQueryHandler(_unitOfWorkMock.Object, _mapperMock.Object);
         }
 
         [Fact]
@@ -51,7 +53,7 @@ namespace UnitTests.Queries.EventQueries
                 Title = "Public Event"
             };
 
-            _ = _repositoryManagerMock.Setup(r => r.Event.GetEventById(query.Id, CancellationToken.None))
+            _ = _unitOfWorkMock.Setup(r => r.Event.GetEventById(query.Id, CancellationToken.None))
                                       .ReturnsAsync(searchedEventDto);
 
             _ = _mapperMock.Setup(m => m.Map<Event>(searchedEventDto))
@@ -89,10 +91,10 @@ namespace UnitTests.Queries.EventQueries
                 Title = "Private Event"
             };
 
-            _ = _repositoryManagerMock.Setup(r => r.Event.GetEventById(query.Id, CancellationToken.None))
+            _ = _unitOfWorkMock.Setup(r => r.Event.GetEventById(query.Id, CancellationToken.None))
                                       .ReturnsAsync(searchedEventDto);
 
-            _ = _repositoryManagerMock.Setup(r => r.RSVP.IsUserInvited(query.UserId, query.Id, CancellationToken.None))
+            _ = _unitOfWorkMock.Setup(r => r.RSVP.IsUserInvited(query.UserId, query.Id, CancellationToken.None))
                                       .ReturnsAsync(true);
 
             _ = _mapperMock.Setup(m => m.Map<Event>(searchedEventDto))
@@ -124,10 +126,10 @@ namespace UnitTests.Queries.EventQueries
                 OwnerId = "otherUser456"
             };
 
-            _ = _repositoryManagerMock.Setup(r => r.Event.GetEventById(query.Id, CancellationToken.None))
+            _ = _unitOfWorkMock.Setup(r => r.Event.GetEventById(query.Id, CancellationToken.None))
                                       .ReturnsAsync(searchedEventDto);
 
-            _ = _repositoryManagerMock.Setup(r => r.RSVP.IsUserInvited(query.UserId, query.Id, CancellationToken.None))
+            _ = _unitOfWorkMock.Setup(r => r.RSVP.IsUserInvited(query.UserId, query.Id, CancellationToken.None))
                                       .ReturnsAsync(false);
 
             // Assert
@@ -151,10 +153,10 @@ namespace UnitTests.Queries.EventQueries
                 OwnerId = "otherUser456"
             };
 
-            _ = _repositoryManagerMock.Setup(r => r.Event.GetEventById(query.Id, CancellationToken.None))
+            _ = _unitOfWorkMock.Setup(r => r.Event.GetEventById(query.Id, CancellationToken.None))
                                       .ReturnsAsync(searchedEventDto);
 
-            _ = _repositoryManagerMock.Setup(r => r.RSVP.IsUserInvited(query.UserId, query.Id, CancellationToken.None))
+            _ = _unitOfWorkMock.Setup(r => r.RSVP.IsUserInvited(query.UserId, query.Id, CancellationToken.None))
                                       .ReturnsAsync(false);
 
             // Assert

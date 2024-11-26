@@ -1,11 +1,14 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using Contracts.Models.Statuses;
+using Application.Commands.RSVPCommands;
 
-using Domain.Commands.RSVPCommands;
+using Domain.Aggregates.Events;
+using Domain.Enums;
 using Domain.Exceptions;
 using Domain.Interfaces;
+
+using Infrastructure;
 
 using Moq;
 
@@ -13,18 +16,18 @@ namespace UnitTests.Commands.RSVPCommands
 {
     public class UpdateRSVPStatusCommandTests
     {
-        private readonly Mock<IRepositoryManager> _repositoryManagerMock;
+        private readonly Mock<IUnitOfWork> _unitOfWorkMock;
         private readonly Mock<IRSVPRepository> _rsvpRepositoryMock;
         private readonly UpdateRSVPStatusHandler _handler;
 
         public UpdateRSVPStatusCommandTests()
         {
-            _repositoryManagerMock = new Mock<IRepositoryManager>();
+            _unitOfWorkMock = new Mock<IUnitOfWork>();
             _rsvpRepositoryMock = new Mock<IRSVPRepository>();
 
-            _ = _repositoryManagerMock.Setup(r => r.RSVP).Returns(_rsvpRepositoryMock.Object);
+            _ = _unitOfWorkMock.Setup(r => r.RSVP).Returns(_rsvpRepositoryMock.Object);
 
-            _handler = new UpdateRSVPStatusHandler(_repositoryManagerMock.Object);
+            _handler = new UpdateRSVPStatusHandler(_unitOfWorkMock.Object);
         }
 
         [Fact]
@@ -81,7 +84,7 @@ namespace UnitTests.Commands.RSVPCommands
             _ = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
-            _repositoryManagerMock.Verify(r => r.RSVP.ChangeRSVPStatus(command.RSVPId, RSVPStatus.Accepted, CancellationToken.None), Times.Once);
+            _unitOfWorkMock.Verify(r => r.RSVP.ChangeRSVPStatus(command.RSVPId, RSVPStatus.Accepted, CancellationToken.None), Times.Once);
         }
 
         [Fact]
@@ -100,7 +103,7 @@ namespace UnitTests.Commands.RSVPCommands
             _ = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
-            _repositoryManagerMock.Verify(r => r.RSVP.ChangeRSVPStatus(command.RSVPId, RSVPStatus.Declined, CancellationToken.None), Times.Once);
+            _unitOfWorkMock.Verify(r => r.RSVP.ChangeRSVPStatus(command.RSVPId, RSVPStatus.Declined, CancellationToken.None), Times.Once);
         }
     }
 }

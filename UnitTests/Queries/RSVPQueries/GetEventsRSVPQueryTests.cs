@@ -2,14 +2,16 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Application.Queries.RSVPQueries;
+
 using AutoMapper;
 
 using Contracts.Models;
 
+using Domain.Aggregates.Events;
 using Domain.Exceptions;
-using Domain.Interfaces;
-using Domain.Models.Database;
-using Domain.Queries.RSVPQueries;
+
+using Infrastructure;
 
 using Moq;
 
@@ -17,16 +19,16 @@ namespace UnitTests.Queries.RSVPQueries
 {
     public class GetEventsRSVPQueryTests
     {
-        private readonly Mock<IRepositoryManager> _repositoryManagerMock;
+        private readonly Mock<IUnitOfWork> _unitOfWorkMock;
         private readonly Mock<IMapper> _mapperMock;
         private readonly GetEventsRSVPQueryHandler _handler;
 
         public GetEventsRSVPQueryTests()
         {
-            _repositoryManagerMock = new Mock<IRepositoryManager>();
+            _unitOfWorkMock = new Mock<IUnitOfWork>();
             _mapperMock = new Mock<IMapper>();
 
-            _handler = new GetEventsRSVPQueryHandler(_repositoryManagerMock.Object, _mapperMock.Object);
+            _handler = new GetEventsRSVPQueryHandler(_unitOfWorkMock.Object, _mapperMock.Object);
         }
 
         [Fact]
@@ -53,10 +55,10 @@ namespace UnitTests.Queries.RSVPQueries
                 new RSVP { Id = "rsvp3", UserEmail = "user3", EventTitle = "event123" }
             };
 
-            _ = _repositoryManagerMock.Setup(r => r.Event.IsUserOwner(query.UserId, query.EventId, CancellationToken.None))
+            _ = _unitOfWorkMock.Setup(r => r.Event.IsUserOwner(query.UserId, query.EventId, CancellationToken.None))
                                       .ReturnsAsync(true);
 
-            _ = _repositoryManagerMock.Setup(r => r.RSVP.GetAllRSVPsForEvent(query.EventId, CancellationToken.None))
+            _ = _unitOfWorkMock.Setup(r => r.RSVP.GetAllRSVPsForEvent(query.EventId, CancellationToken.None))
                                       .ReturnsAsync(rsvpDtos);
 
             _ = _mapperMock.Setup(m => m.Map<IEnumerable<RSVP>>(rsvpDtos))
@@ -80,7 +82,7 @@ namespace UnitTests.Queries.RSVPQueries
                 UserId = "user123"
             };
 
-            _ = _repositoryManagerMock.Setup(r => r.Event.IsUserOwner(query.UserId, query.EventId, CancellationToken.None))
+            _ = _unitOfWorkMock.Setup(r => r.Event.IsUserOwner(query.UserId, query.EventId, CancellationToken.None))
                                       .ReturnsAsync(false);
 
             // Assert

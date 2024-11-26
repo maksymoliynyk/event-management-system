@@ -1,23 +1,19 @@
 using System;
 using System.Threading.Tasks;
 using System.Threading;
-
-using Domain.DbContexts;
-using Domain.Interfaces;
 using Domain.Models.Database;
-using Domain.Repositories;
 using Domain.Services;
 using Domain.Exceptions;
 using Domain.Models;
-
-
-using Faker;
 using Moq;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
+using Infrastructure;
+using Infrastructure.Repositories;
+using Domain.Aggregates.Users;
 
 namespace IntegrationTests.Repository
 {

@@ -5,11 +5,11 @@ using MediatR;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Domain.Queries.UserQueries;
 using API.Extensions;
-using Domain.Queries.RSVPQueries;
 using System.Linq;
 using Contracts.Models;
+using Application.Queries.UserQueries;
+using Application.Queries.RSVPQueries;
 
 namespace API.Controllers
 {

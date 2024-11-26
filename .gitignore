@@ -479,5 +479,4 @@ $RECYCLE.BIN/
 #custom
 *.mdj
 Documentation/
-UnitTests/SomeTests
-IntegrationTests/Controllers
+.idea/

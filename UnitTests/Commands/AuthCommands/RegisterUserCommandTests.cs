@@ -1,11 +1,14 @@
 using System.Threading;
 using System.Threading.Tasks;
 
+using Application.Commands.AuthCommands;
+
 using AutoMapper;
 
-using Domain.Commands.AuthCommands;
-using Domain.Interfaces;
+using Domain.Aggregates.Users;
 using Domain.Models.Database;
+
+using Infrastructure;
 
 using Microsoft.AspNetCore.Identity;
 
@@ -15,18 +18,18 @@ namespace UnitTests.Commands.AuthCommands
 {
     public class RegisterUserCommandTests
     {
-        private readonly Mock<IRepositoryManager> _repositoryManagerMock;
+        private readonly Mock<IUnitOfWork> _unitOfWorkMock;
         private readonly Mock<IUserRepository> _userRepositoryMock;
         private readonly RegisterUserCommandHandler _handler;
         private readonly Mock<IMapper> _mapperMock;
 
         public RegisterUserCommandTests()
         {
-            _repositoryManagerMock = new Mock<IRepositoryManager>();
+            _unitOfWorkMock = new Mock<IUnitOfWork>();
             _userRepositoryMock = new Mock<IUserRepository>();
             _mapperMock = new Mock<IMapper>();
-            _ = _repositoryManagerMock.Setup(r => r.User).Returns(_userRepositoryMock.Object);
-            _handler = new RegisterUserCommandHandler(_repositoryManagerMock.Object, _mapperMock.Object);
+            _ = _unitOfWorkMock.Setup(r => r.User).Returns(_userRepositoryMock.Object);
+            _handler = new RegisterUserCommandHandler(_unitOfWorkMock.Object, _mapperMock.Object);
         }
         [Fact]
         public async Task HandleValidRegistrationReturnsSuccessResult()

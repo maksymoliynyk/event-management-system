@@ -1,10 +1,13 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using Domain.Commands.AuthCommands;
+using Application.Commands.AuthCommands;
+
+using Domain.Aggregates.Users;
 using Domain.Exceptions;
-using Domain.Interfaces;
 using Domain.Models;
+
+using Infrastructure;
 
 using Moq;
 
@@ -12,16 +15,16 @@ namespace UnitTests.Commands.AuthCommands
 {
     public class LoginUserCommandTests
     {
-        private readonly Mock<IRepositoryManager> _repositoryManagerMock;
+        private readonly Mock<IUnitOfWork> _unitOfWorkMock;
         private readonly Mock<IUserRepository> _userRepositoryMock;
         private readonly LoginUserCommandHandler _handler;
 
         public LoginUserCommandTests()
         {
-            _repositoryManagerMock = new Mock<IRepositoryManager>();
+            _unitOfWorkMock = new Mock<IUnitOfWork>();
             _userRepositoryMock = new Mock<IUserRepository>();
-            _ = _repositoryManagerMock.Setup(r => r.User).Returns(_userRepositoryMock.Object);
-            _handler = new LoginUserCommandHandler(_repositoryManagerMock.Object);
+            _ = _unitOfWorkMock.Setup(r => r.User).Returns(_userRepositoryMock.Object);
+            _handler = new LoginUserCommandHandler(_unitOfWorkMock.Object);
         }
 
         [Fact]

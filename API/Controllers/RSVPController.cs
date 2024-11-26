@@ -3,10 +3,10 @@ using System.Threading.Tasks;
 
 using API.Extensions;
 
-using Contracts.RequestModels;
+using Application.Commands.RSVPCommands;
+using Application.Queries.RSVPQueries;
 
-using Domain.Commands.RSVPCommands;
-using Domain.Queries.RSVPQueries;
+using Contracts.RequestModels;
 
 using MediatR;
 

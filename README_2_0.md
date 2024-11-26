@@ -2,24 +2,24 @@
 
 # Event Management System
 
-This is a simple event management system that allows users to create, delete and update events, invite attendees, manage RSVPs and check the history of created events. The system is built using the ASP.NET framework and uses a PostgreSQL database.
+This is a simple event management system that allows users to create, delete and update events, invite attendees, manage RSVPs and check the history of created events. The system is built using the ASP.NET framework and uses a PostgresSQL database.
 
 ## User stories
 
 ### Event owner
 
-- As a event owner, I want to be able to create an event.
-- As a event owner, I want to be able to delete an event.
-- As a event owner, I want to be able to update information about event.
-- As a event owner, I want to be able to invite attendees to an event.
-- As a event owner, I want to be able to see my created events.
-- As a event owner, I want to be able to see sended invitations and their statuses.
-- As a event owner, I want to be able to see attendees.
+- As an event owner, I want to be able to create an event.
+- As an event owner, I want to be able to delete an event.
+- As an event owner, I want to be able to update information about event.
+- As an event owner, I want to be able to invite attendees to an event.
+- As an event owner, I want to be able to see my created events.
+- As an event owner, I want to be able to see sent invitations and their statuses.
+- As an event owner, I want to be able to see attendees.
 
 ### Attendee
 
-- As a attendee, I want to see events that i'm going to attend.
-- As a attendee, I want to be able to manage invitations.
+- As an attendee, I want to see events that I'm going to attend.
+- As an attendee, I want to be able to manage invitations.
 
 ## Api Endpoints
 

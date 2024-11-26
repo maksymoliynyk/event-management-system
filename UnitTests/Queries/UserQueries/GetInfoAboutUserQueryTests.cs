@@ -1,9 +1,11 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using Domain.Interfaces;
+using Application.Queries.UserQueries;
+
 using Domain.Models.Database;
-using Domain.Queries.UserQueries;
+
+using Infrastructure;
 
 using Moq;
 
@@ -11,13 +13,13 @@ namespace UnitTests.Queries.UserQueries
 {
     public class GetInfoAboutUserQueryTests
     {
-        private readonly Mock<IRepositoryManager> _repositoryManagerMock;
+        private readonly Mock<IUnitOfWork> _unitOfWorkMock;
         private readonly GetInfoAboutUserQueryHandler _handler;
 
         public GetInfoAboutUserQueryTests()
         {
-            _repositoryManagerMock = new Mock<IRepositoryManager>();
-            _handler = new GetInfoAboutUserQueryHandler(_repositoryManagerMock.Object);
+            _unitOfWorkMock = new Mock<IUnitOfWork>();
+            _handler = new GetInfoAboutUserQueryHandler(_unitOfWorkMock.Object);
         }
 
         [Fact]
@@ -35,7 +37,7 @@ namespace UnitTests.Queries.UserQueries
                 Email = "john.doe@example.com"
             };
 
-            _ = _repositoryManagerMock.Setup(r => r.User.GetUserByUsername(query.UserName, CancellationToken.None))
+            _ = _unitOfWorkMock.Setup(r => r.User.GetUserByUsername(query.UserName, CancellationToken.None))
                                       .ReturnsAsync(userDto);
 
             // Act

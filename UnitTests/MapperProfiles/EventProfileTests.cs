@@ -1,11 +1,12 @@
 using System;
 
+using Application.MapperProfiles;
+
 using AutoMapper;
 
 using Contracts.Models;
 
-using Domain.MapperProfiles;
-using Domain.Models.Database;
+using Domain.Aggregates.Events;
 
 namespace UnitTests.MapperProfiles
 {

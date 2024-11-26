@@ -2,13 +2,15 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Application.Queries.UserQueries;
+
 using AutoMapper;
 
 using Contracts.Models;
 
-using Domain.Interfaces;
-using Domain.Models.Database;
-using Domain.Queries.UserQueries;
+using Domain.Aggregates.Events;
+
+using Infrastructure;
 
 using Moq;
 
@@ -16,16 +18,16 @@ namespace UnitTests.Queries.UserQueries
 {
     public class GetAllEventsWhereUserAreParticipateQueryTests
     {
-        private readonly Mock<IRepositoryManager> _repositoryManagerMock;
+        private readonly Mock<IUnitOfWork> _unitOfWorkMock;
         private readonly Mock<IMapper> _mapperMock;
         private readonly GetAllEventsWhereUserAreParticipateHandler _handler;
 
         public GetAllEventsWhereUserAreParticipateQueryTests()
         {
-            _repositoryManagerMock = new Mock<IRepositoryManager>();
+            _unitOfWorkMock = new Mock<IUnitOfWork>();
             _mapperMock = new Mock<IMapper>();
 
-            _handler = new GetAllEventsWhereUserAreParticipateHandler(_mapperMock.Object, _repositoryManagerMock.Object);
+            _handler = new GetAllEventsWhereUserAreParticipateHandler(_mapperMock.Object, _unitOfWorkMock.Object);
         }
 
         [Fact]
@@ -51,7 +53,7 @@ namespace UnitTests.Queries.UserQueries
                 new Event { Id = "event3", Title = "Event 3", OwnerEmail = "user123" }
             };
 
-            _ = _repositoryManagerMock.Setup(r => r.Event.GetAllEventsWhereUserAreParticipate(query.UserId, CancellationToken.None))
+            _ = _unitOfWorkMock.Setup(r => r.Event.GetAllEventsWhereUserAreParticipate(query.UserId, CancellationToken.None))
                                       .ReturnsAsync(eventDtos);
 
             _ = _mapperMock.Setup(m => m.Map<IEnumerable<Event>>(eventDtos))

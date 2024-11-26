@@ -1,10 +1,15 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using Domain.Commands.RSVPCommands;
+using Application.Commands.RSVPCommands;
+
+using Domain.Aggregates.Events;
+using Domain.Aggregates.Users;
 using Domain.Exceptions;
 using Domain.Interfaces;
 using Domain.Models.Database;
+
+using Infrastructure;
 
 using Moq;
 
@@ -12,7 +17,7 @@ namespace UnitTests.Commands.RSVPCommands
 {
     public class SendRSVPCommandTests
     {
-        private readonly Mock<IRepositoryManager> _repositoryManagerMock;
+        private readonly Mock<IUnitOfWork> _unitOfWorkMock;
         private readonly Mock<IUserRepository> _userRepositoryMock;
         private readonly Mock<IEventRepository> _eventRepositoryMock;
         private readonly Mock<IRSVPRepository> _rsvpRepositoryMock;
@@ -20,16 +25,16 @@ namespace UnitTests.Commands.RSVPCommands
 
         public SendRSVPCommandTests()
         {
-            _repositoryManagerMock = new Mock<IRepositoryManager>();
+            _unitOfWorkMock = new Mock<IUnitOfWork>();
             _userRepositoryMock = new Mock<IUserRepository>();
             _eventRepositoryMock = new Mock<IEventRepository>();
             _rsvpRepositoryMock = new Mock<IRSVPRepository>();
 
-            _ = _repositoryManagerMock.Setup(r => r.User).Returns(_userRepositoryMock.Object);
-            _ = _repositoryManagerMock.Setup(r => r.Event).Returns(_eventRepositoryMock.Object);
-            _ = _repositoryManagerMock.Setup(r => r.RSVP).Returns(_rsvpRepositoryMock.Object);
+            _ = _unitOfWorkMock.Setup(r => r.User).Returns(_userRepositoryMock.Object);
+            _ = _unitOfWorkMock.Setup(r => r.Event).Returns(_eventRepositoryMock.Object);
+            _ = _unitOfWorkMock.Setup(r => r.RSVP).Returns(_rsvpRepositoryMock.Object);
 
-            _handler = new SendRSVPCommandHandler(_repositoryManagerMock.Object);
+            _handler = new SendRSVPCommandHandler(_unitOfWorkMock.Object);
         }
 
         [Fact]

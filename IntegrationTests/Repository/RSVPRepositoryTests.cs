@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Contracts.Models.Statuses;
-
-using Domain.DbContexts;
+using Domain.Aggregates.Events;
+using Domain.Enums;
 using Domain.Exceptions;
 using Domain.Interfaces;
 using Domain.Models.Database;
-using Domain.Repositories;
+
+using Infrastructure;
+using Infrastructure.Repositories;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -228,7 +229,7 @@ namespace IntegrationTests.Repository
             _ = await _dbContext.SaveChangesAsync(CancellationToken.None);
         }
         [Theory]
-        [InlineData(RSVPStatus.Invited, ObjectStatusError.NewStatusCannotBeSameAsOldStatus, ObjectType.RSVP)]
+        [InlineData(RSVPStatus.Pending, ObjectStatusError.NewStatusCannotBeSameAsOldStatus, ObjectType.RSVP)]
         [InlineData(RSVPStatus.Accepted, ObjectStatusError.StatusCannotBeChanged, ObjectType.RSVP)]
         [InlineData(RSVPStatus.Declined, ObjectStatusError.StatusCannotBeChanged, ObjectType.RSVP)]
         public async Task InvalidChangeStatusShouldThrowExcception(RSVPStatus status, ObjectStatusError error, ObjectType type)

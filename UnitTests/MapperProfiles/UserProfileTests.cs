@@ -1,10 +1,9 @@
+using Application.Commands.AuthCommands;
+using Application.MapperProfiles;
+
 using AutoMapper;
 
 using Contracts.Models;
-
-using Domain.Commands.AuthCommands;
-using Domain.MapperProfiles;
-using Domain.Models.Database;
 
 namespace UnitTests.MapperProfiles
 {
