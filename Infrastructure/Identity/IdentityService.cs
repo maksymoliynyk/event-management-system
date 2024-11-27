@@ -11,9 +11,9 @@ namespace Infrastructure.Identity;
 public class IdentityService : IIdentityService
 {
     private readonly UserManager<User> _userManager;
-    private readonly TokenProvider _tokenProvider;
+    private readonly ITokenProvider _tokenProvider;
 
-    public IdentityService(UserManager<User> userManager, TokenProvider tokenProvider)
+    public IdentityService(UserManager<User> userManager, ITokenProvider tokenProvider)
     {
         _userManager = userManager;
         _tokenProvider = tokenProvider;
@@ -31,7 +31,7 @@ public class IdentityService : IIdentityService
 
     public async Task<string> LoginUserAsync(string email, string password, CancellationToken ct)
     {
-        var user = await GetUserByEmail(email, ct);
+        var user = await GetUserByEmail(email);
         var result = await _userManager.CheckPasswordAsync(user, password);
         return result ?
             _tokenProvider.GetToken(user) :
@@ -40,13 +40,14 @@ public class IdentityService : IIdentityService
 
     public async Task<IdentityResult> RegisterUserAsync(string email, string password, string firstName, string lastName, CancellationToken ct)
     {
-        if (await GetUserByEmail(email, ct) != null)
+        if (await GetUserByEmail(email) != null)
         {
             throw new System.Exception("User exist");
         }
         
         var user = new User
         {
+            UserName = email,
             Email = email,
             FirstName = firstName,
             LastName = lastName
@@ -60,7 +61,7 @@ public class IdentityService : IIdentityService
         throw new System.NotImplementedException();
     }
 
-    private async Task<User> GetUserByEmail(string email, CancellationToken ct)
+    public async Task<User> GetUserByEmail(string email)
     {
         return await _userManager.FindByEmailAsync(email);
     }

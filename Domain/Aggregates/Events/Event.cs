@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using Domain.Entities.Users;
 using Domain.Enums;
@@ -26,7 +27,8 @@ public class Event
     public IReadOnlyCollection<RSVP> RSVPs => _rsvps.AsReadOnly();
     public IReadOnlyCollection<Attendee> Attendees => _attendees.AsReadOnly();
 
-    public static Event CreateEvent(string title, string description, TimeSpan duration, string location, Guid ownerId, DateTime startDate)
+    public static Event CreateEvent(string title, string description, TimeSpan duration, string location, Guid ownerId,
+        DateTime startDate)
     {
         var newEvent = new Event()
         {
@@ -44,7 +46,22 @@ public class Event
         return newEvent;
     }
 
-    public void CreateRSVP(Guid inviteeId)
+    public void CancelEvent()
+    {
+        if (Status == EventStatus.Cancelled)
+        {
+            throw new Exception("Event already cancelled");
+        }
+
+        if (StartDate.Add(Duration) > DateTime.UtcNow || Status == EventStatus.Finished)
+        {
+            throw new Exception("Event already ended");
+        }
+
+        Status = EventStatus.Cancelled;
+    }
+
+    public Guid CreateRSVP(Guid inviteeId)
     {
         if (inviteeId == OwnerId)
         {
@@ -56,13 +73,20 @@ public class Event
             throw new Exception("Event already cancelled");
         }
 
-        if (StartDate.Add(Duration) > DateTime.UtcNow || Status == EventStatus.Finished)
+        if (StartDate.Add(Duration) < DateTime.UtcNow || Status == EventStatus.Finished)
         {
             throw new Exception("Event already ended");
         }
 
+        if (_rsvps.FirstOrDefault(i => i.UserId == inviteeId) != null)
+        {
+            throw new Exception("User already invited");
+        }
+
         var rsvp = new RSVP(Id, inviteeId);
         _rsvps.Add(rsvp);
+
+        return rsvp.Id;
     }
 
     public void CreateAttendee(Guid userId)

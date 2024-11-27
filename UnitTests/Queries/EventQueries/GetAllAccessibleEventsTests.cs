@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Application.Queries.EventQueries;
+using Application.Queries.Events;
 
 using AutoMapper;
 
@@ -16,25 +16,25 @@ using Moq;
 
 namespace UnitTests.Queries.EventQueries
 {
-    public class GetAllAccessibleEventsQueryTests
+    public class GetAllEventsByUserQueryTests
     {
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
         private readonly Mock<IMapper> _mapperMock;
-        private readonly GetAllAccessibleEventsHandler _handler;
+        private readonly GetAllEventsByUserQueryHandler _byUserQueryHandler;
 
-        public GetAllAccessibleEventsQueryTests()
+        public GetAllEventsByUserQueryTests()
         {
             _unitOfWorkMock = new Mock<IUnitOfWork>();
             _mapperMock = new Mock<IMapper>();
 
-            _handler = new GetAllAccessibleEventsHandler(_unitOfWorkMock.Object, _mapperMock.Object);
+            _byUserQueryHandler = new GetAllEventsByUserQueryHandler(_unitOfWorkMock.Object, _mapperMock.Object);
         }
 
         [Fact]
         public async Task HandleValidGetAllAccessibleEventsQueryReturnsAllEvents()
         {
             // Arrange
-            GetAllAccessibleEventsQuery query = new()
+            GetAllEventsByUserQuery byUserQuery = new()
             {
                 UserId = "user123"
             };
@@ -53,18 +53,18 @@ namespace UnitTests.Queries.EventQueries
                 new Event { Id = "event3", Title = "Event 3" }
             };
 
-            _ = _unitOfWorkMock.Setup(r => r.Event.GetAllEvents(query.UserId, CancellationToken.None))
+            _ = _unitOfWorkMock.Setup(r => r.Event.GetAllEvents(byUserQuery.UserId, CancellationToken.None))
                                       .ReturnsAsync(eventDtos);
 
             _ = _mapperMock.Setup(m => m.Map<IEnumerable<Event>>(eventDtos))
                             .Returns(mappedEvents);
 
             // Act
-            GetAllAccessibleEventsResult result = await _handler.Handle(query, CancellationToken.None);
+            GetAllEventsByUserQueryResult byUserQueryResult = await _byUserQueryHandler.Handle(byUserQuery, CancellationToken.None);
 
             // Assert
-            Assert.NotNull(result);
-            Assert.Equal(mappedEvents, result.Events);
+            Assert.NotNull(byUserQueryResult);
+            Assert.Equal(mappedEvents, byUserQueryResult.Events);
         }
     }
 }

@@ -3,6 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 using API.Extensions;
+using API.Middleware;
+
+using Application.DependencyInjection;
 
 using Infrastructure.DependencyInjection;
 
@@ -10,12 +13,10 @@ using Serilog;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
-Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(builder.Configuration)
-    .CreateLogger();
-builder.Host.UseSerilog();
+builder.Host.UseSerilog((context, loggerConfig) =>
+{
+    loggerConfig.ReadFrom.Configuration(context.Configuration);
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -26,13 +27,12 @@ builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
 //* Extension Methods
 builder.Services.ConfigureCORS();
-builder.Services.RegisterMediatR();
-builder.Services.ConfigureMapping();
 builder.Services.ConfigureValidation();
 
 builder.Services.AddCustomOptions()
     .AddIdentity(builder.Configuration)
-    .AddInfrastructure(builder.Configuration);
+    .AddInfrastructure(builder.Configuration)
+    .AddApplication();
 
 var app = builder.Build();
 
@@ -51,8 +51,12 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseMiddleware<UserContextMiddleware>();
+
 app.MapControllers();
 
 app.Run();
 
-public partial class Program { }
+public partial class Program
+{
+}

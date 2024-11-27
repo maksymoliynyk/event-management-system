@@ -4,8 +4,6 @@ using Application.MapperProfiles;
 
 using AutoMapper;
 
-using Contracts.Models;
-
 using Domain.Aggregates.Events;
 
 namespace UnitTests.MapperProfiles

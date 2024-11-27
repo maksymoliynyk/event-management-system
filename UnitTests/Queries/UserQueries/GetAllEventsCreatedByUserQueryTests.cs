@@ -2,11 +2,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Application.Queries.UserQueries;
-
 using AutoMapper;
-
-using Contracts.Models;
 
 using Domain.Aggregates.Events;
 

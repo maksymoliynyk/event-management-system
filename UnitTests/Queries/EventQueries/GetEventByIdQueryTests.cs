@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using Application.Queries.EventQueries;
+using Application.Queries.Events;
 
 using AutoMapper;
 

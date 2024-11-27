@@ -53,12 +53,12 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
         builder.HasMany(e => e.RSVPs)
             .WithOne()
             .HasForeignKey(r => r.EventId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.ClientCascade);
 
         builder.HasMany(e => e.Attendees)
             .WithOne()
             .HasForeignKey(a => a.EventId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.ClientCascade);
 
         // Indexes
         builder.HasIndex(e => e.OwnerId).HasDatabaseName("IX_Event_OwnerId");

@@ -5,11 +5,11 @@ using Domain.Aggregates.Events;
 
 namespace Infrastructure.Repositories;
 
-internal class EventRepository : IEventRepository
+public class EventRepository : IEventRepository
 {
     private readonly EventManagementContext _context;
 
-    internal EventRepository(EventManagementContext context)
+    public EventRepository(EventManagementContext context)
     {
         _context = context;
     }
@@ -19,14 +19,19 @@ internal class EventRepository : IEventRepository
         _context.Events.Add(@event);
     }
 
+    public Event GetById(Guid eventId)
+    {
+        return _context.Events.FirstOrDefault(e => e.Id == eventId);
+    }
+
     public void Delete(Event @event)
     {
         _context.Events.Remove(@event);
     }
 
-    public Event GetById(Guid eventId, Guid userId)
+    public Event GetById(Guid eventId, Guid ownerId)
     {
-        return _context.Events.FirstOrDefault(e => e.OwnerId == userId && e.Id == eventId);
+        return _context.Events.FirstOrDefault(e => e.OwnerId == ownerId && e.Id == eventId);
     }
 
     public void Update(Event @event)

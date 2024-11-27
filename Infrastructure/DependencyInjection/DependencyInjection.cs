@@ -1,15 +1,23 @@
-﻿using Domain.Aggregates.Events;
+﻿using System.Text;
+
+using Application.Interfaces;
+
+using Domain.Aggregates.Events;
 using Domain.Entities.Users;
+using Domain.Interfaces;
 
 using Infrastructure.Identity;
+using Infrastructure.Options;
 using Infrastructure.Options.OptionsSetup;
 using Infrastructure.Repositories;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure.DependencyInjection;
 
@@ -18,7 +26,6 @@ public static class DependencyInjection
     public static IServiceCollection AddCustomOptions(this IServiceCollection services)
     {
         services.ConfigureOptions<JwtOptionSetup>();
-        services.ConfigureOptions<JwtBearerOptionSetup>();
 
         return services;
     }
@@ -27,12 +34,19 @@ public static class DependencyInjection
     {
         // TODO: fix config
         services.AddDbContext<EventManagementContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IEventRepository, EventRepository>();
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<ITokenProvider, TokenProvider>();
+
+        services.AddScoped<IEventQueryRepository>(_ =>
+        {
+            var connectionString = configuration.GetConnectionString("ReadOnlyConnection");
+            var dbConnection = new SqlConnection(connectionString);
+            return new EventQueryRepository(dbConnection);
+        });
 
         return services;
     }
@@ -49,11 +63,29 @@ public static class DependencyInjection
                 options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = false;
             })
-            .AddEntityFrameworkStores<EventManagementContext>()
-            .AddDefaultTokenProviders();
+            .AddEntityFrameworkStores<EventManagementContext>();
 
+        services.AddAuthorization();
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer();
+            .AddJwtBearer(options =>
+            {
+                using var serviceProvider = services.BuildServiceProvider();
+                var jwtOptions = serviceProvider.GetRequiredService<IOptions<JwtOption>>().Value;
+                
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtOptions.Issuer,
+                    ValidAudience = jwtOptions.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(jwtOptions.SecretKey))
+                };
+                options.UseSecurityTokenValidators = true;
+                options.MapInboundClaims = false;
+            });
 
         return services;
     }

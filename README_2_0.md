@@ -36,11 +36,14 @@ Log in as a user.
 `POST /events`
 Create a new event.
 
-`GET /events/owner`
+`GET /events?owner=true`
 Retrieve all events created by the authenticated user (event owner).
 
 `GET /events/{id}`
 Retrieve detailed information about a specific event.
+
+`PATCH /events/{id}/cancel`
+Cancel a specific event
 
 `PUT /events/{id}`
 Update information about a specific event (e.g., time, location).
@@ -48,7 +51,7 @@ Update information about a specific event (e.g., time, location).
 `DELETE /events/{id}`
 Delete a specific event created by the authenticated user.
 
-`POST /events/{id}/invite`
+`POST /events/{id}/invites`
 Send invitations to attendees for a specific event.
 
 `GET /events/{id}/invites`
@@ -59,13 +62,11 @@ Retrieve a list of attendees who have accepted the invitation to a specific even
 
 ### Event Management (Attendee)
 
-`GET /events/attending`
+`GET /events`
 Retrieve a list of events the authenticated user is attending.
 
-### Invite Management (Attendee)
+`PATCH /events/{eventId}/invites`
+Respond to a specific invitation (e.g., accept, decline, or mark as tentative).
 
 `GET /invites`
 Retrieve a list of received invitations for the authenticated user.
-
-`PATCH /invites/{id}`
-Respond to a specific invitation (e.g., accept, decline, or mark as tentative).

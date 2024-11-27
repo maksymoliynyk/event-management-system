@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
@@ -9,6 +7,7 @@ using Domain.Entities.Users;
 using Infrastructure.Options;
 
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure.Identity;
@@ -29,27 +28,26 @@ public class TokenProvider : ITokenProvider
 
     public string GetToken(User user)
     {
-        var claims = new List<Claim>()
+        var claims = new[]
         {
-            new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new(JwtRegisteredClaimNames.Name, user.UserName),
-            new(JwtRegisteredClaimNames.Email, user.Email)
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new Claim(JwtRegisteredClaimNames.Email, user.Email)
         };
 
-        var signingCredentials = new SigningCredentials(
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOption.SecretKey)),
-            SecurityAlgorithms.Sha256);
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOption.SecretKey));
+        var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var token = new JwtSecurityToken(
-            _jwtOption.Issuer,
-            _jwtOption.Audience,
-            claims,
-            null,
-            DateTime.UtcNow.AddDays(7),
-            signingCredentials
-        );
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(claims),
+            Expires = DateTime.UtcNow.AddDays(7),
+            Issuer = _jwtOption.Issuer,
+            Audience = _jwtOption.Audience,
+            SigningCredentials = signingCredentials
+        };
 
-        var handler = new JwtSecurityTokenHandler();
-        return handler.WriteToken(token);
+        var tokenHandler = new JsonWebTokenHandler();
+
+        return tokenHandler.CreateToken(tokenDescriptor);
     }
 }

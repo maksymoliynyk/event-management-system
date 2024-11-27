@@ -2,11 +2,9 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Application.Queries.UserQueries;
+using Application.Queries.Attendees;
 
 using AutoMapper;
-
-using Contracts.Models;
 
 using Domain.Aggregates.Events;
 
@@ -20,14 +18,14 @@ namespace UnitTests.Queries.UserQueries
     {
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
         private readonly Mock<IMapper> _mapperMock;
-        private readonly GetAllEventsWhereUserAreParticipateHandler _handler;
+        private readonly GetAllAttendeesByEventQueryHandler _handler;
 
         public GetAllEventsWhereUserAreParticipateQueryTests()
         {
             _unitOfWorkMock = new Mock<IUnitOfWork>();
             _mapperMock = new Mock<IMapper>();
 
-            _handler = new GetAllEventsWhereUserAreParticipateHandler(_mapperMock.Object, _unitOfWorkMock.Object);
+            _handler = new GetAllAttendeesByEventQueryHandler(_mapperMock.Object, _unitOfWorkMock.Object);
         }
 
         [Fact]

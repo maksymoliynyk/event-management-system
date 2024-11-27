@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using Application.Commands.EventCommands;
+using Application.Commands.Events;
 
 using Domain.Aggregates.Events;
 using Domain.Exceptions;

@@ -1,8 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using Application.Queries.UserQueries;
-
 using Domain.Models.Database;
 
 using Infrastructure;

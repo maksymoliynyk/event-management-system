@@ -1,4 +1,4 @@
-using Application.Commands.AuthCommands;
+using Application.Commands.Auth;
 using Application.MapperProfiles;
 
 using AutoMapper;

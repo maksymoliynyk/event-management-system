@@ -2,11 +2,9 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Application.Queries.RSVPQueries;
+using Application.Queries.RSVPs;
 
 using AutoMapper;
-
-using Contracts.Models;
 
 using Domain.Aggregates.Events;
 
@@ -60,11 +58,11 @@ namespace UnitTests.Queries.RSVPQueries
                             .Returns(mappedRSVPs);
 
             // Act
-            GetUsersRSVPResult result = await _handler.Handle(query, CancellationToken.None);
+            GetUsersRSVPQueryResult queryResult = await _handler.Handle(query, CancellationToken.None);
 
             // Assert
-            Assert.NotNull(result);
-            Assert.Equal(mappedRSVPs, result.RSVPs);
+            Assert.NotNull(queryResult);
+            Assert.Equal(mappedRSVPs, queryResult.RSVPs);
         }
     }
 }

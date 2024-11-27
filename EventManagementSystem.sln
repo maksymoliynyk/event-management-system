@@ -4,13 +4,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API", "API\API.csproj", "{0DD6F92E-4243-4E40-A4BA-57E24C289183}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts", "Contracts\Contracts.csproj", "{A4ED14E5-CA73-4C3F-94CF-787C6A0D0235}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{4FD95F71-228F-4682-AE70-B1BC623E2197}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "IntegrationTests\IntegrationTests.csproj", "{2B4CE2B7-3B06-4311-A4BE-16AFA998C07E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{3CD46CE8-E0AE-45B0-82FA-5AC8CF915537}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{6170ACD3-AE4C-4485-9906-C86216D25C16}"
 EndProject
@@ -29,10 +23,6 @@ Global
 		{0DD6F92E-4243-4E40-A4BA-57E24C289183}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0DD6F92E-4243-4E40-A4BA-57E24C289183}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0DD6F92E-4243-4E40-A4BA-57E24C289183}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A4ED14E5-CA73-4C3F-94CF-787C6A0D0235}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A4ED14E5-CA73-4C3F-94CF-787C6A0D0235}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A4ED14E5-CA73-4C3F-94CF-787C6A0D0235}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A4ED14E5-CA73-4C3F-94CF-787C6A0D0235}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4FD95F71-228F-4682-AE70-B1BC623E2197}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4FD95F71-228F-4682-AE70-B1BC623E2197}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4FD95F71-228F-4682-AE70-B1BC623E2197}.Release|Any CPU.ActiveCfg = Release|Any CPU

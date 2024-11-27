@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure;
 
-internal class EventManagementContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
+public class EventManagementContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 {
     public DbSet<Event> Events { get; set; }
     public DbSet<RSVP> RSPVs { get; set; }
@@ -21,14 +21,14 @@ internal class EventManagementContext : IdentityDbContext<User, IdentityRole<Gui
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseNpgsql();
+        optionsBuilder.UseSqlServer();
         base.OnConfiguring(optionsBuilder);
     }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        builder.HasDefaultSchema("event_management");
+        builder.HasDefaultSchema("eventmanagement");
         builder.ApplyConfigurationsFromAssembly(typeof(EventManagementContext).Assembly);
     }
 }

@@ -1,23 +1,18 @@
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Domain.Aggregates.Events;
+using Domain.Interfaces;
 
 using Infrastructure.Repositories;
 
 namespace Infrastructure;
-public interface IUnitOfWork : IDisposable
-{
-    IEventRepository Event { get; }
-    Task SaveAsync(CancellationToken ct);
-}
 
 public class UnitOfWork : IUnitOfWork
 {
     private readonly EventManagementContext _context;
 
-    internal UnitOfWork(EventManagementContext context)
+    public UnitOfWork(EventManagementContext context)
     {
         _context = context;
     }

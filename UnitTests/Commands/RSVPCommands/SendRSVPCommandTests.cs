@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using Application.Commands.RSVPCommands;
+using Application.Commands.RSVPs;
 
 using Domain.Aggregates.Events;
 using Domain.Aggregates.Users;

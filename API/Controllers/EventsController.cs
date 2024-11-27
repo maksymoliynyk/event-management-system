@@ -1,42 +1,37 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 using API.Filters;
-using API.Extensions;
-
-using Contracts.RequestModels;
 
 using MediatR;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using FluentValidation;
-using FluentValidation.Results;
+
 using System.Linq;
-using Contracts.Models;
-using Application.Commands.EventCommands;
-using Application.Queries.EventQueries;
-using Application.Commands.RSVPCommands;
-using Application.Queries.RSVPQueries;
+
+using API.Models;
+
+using Application.Commands.Events;
+using Application.Commands.RSVPs;
+using Application.Enums;
+using Application.Queries.Attendees;
+using Application.Queries.Events;
+using Application.Queries.RSVPs;
+
+using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("[controller]")]
     [TypeFilter(typeof(EventControllerExceptionFilter))]
-    public class EventsController : ControllerBase
+    public class EventsController : BaseController
     {
-        private readonly IMediator _mediator;
-        private readonly IValidator<CreateEventRequest> _createEventValidator;
-        private readonly IValidator<EmailRequest> _emailRequestValidator;
-
-        public EventsController(IMediator mediator
-        , IValidator<CreateEventRequest> createEventValidator, IValidator<EmailRequest> emailRequestValidator
-        )
+        public EventsController(ILogger<EventsController> logger, ISender sender) : base(logger, sender)
         {
-            _mediator = mediator;
-            _createEventValidator = createEventValidator;
-            _emailRequestValidator = emailRequestValidator;
         }
 
         /// <summary>
@@ -48,156 +43,146 @@ namespace API.Controllers
         /// <response code="201">Returns the newly created event</response>
         /// <response code="400">Bad request</response>
         /// <response code="500">Server error</response>
-
         [HttpPost]
-        [Authorize]
-        public async Task<IActionResult> CreateEvent([FromBody] CreateEventRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> CreateEvent([FromBody] CreateEventRequestModel request,
+            CancellationToken cancellationToken)
         {
-            ValidationResult validationResult = await _createEventValidator.ValidateAsync(request, cancellationToken);
-            if (!validationResult.IsValid)
-            {
-                validationResult.AddToModelState(ModelState);
-                return BadRequest(ModelState);
-            }
-            CreateEventCommand command = new()
-            {
-                Title = request.Title,
-                Description = request.Description,
-                Date = request.Date,
-                Duration = request.Duration,
-                Location = request.Location,
-                IsPublic = request.IsPublic,
-                UserId = User.GetUserIdFromJWT()
-            };
-            CreateEventResult result = await _mediator.Send(command, cancellationToken);
-            return Created($"{result.Id}", result);
+            var command = new CreateEventCommand(
+                request.Title,
+                request.Description,
+                request.StartDate,
+                request.Duration,
+                request.Location,
+                GetUserId());
+            var result = await _sender.Send(command, cancellationToken);
+            return CreatedAtRoute($"{result.Id}", result);
         }
 
         /// <summary>
         /// Get Event By Id
         /// </summary>
-        /// <param name="id">Id of searched event</param>
+        /// <param name="eventId">Id of searched event</param>
         /// <param name="cancellationToken">Cancellation Token</param>
         /// <returns>Information about event</returns>
         /// <response code="200">Returns the event</response>
         /// <response code="404">Event not found</response>
         /// <response code="500">Server error</response>
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetEventById([FromRoute] string id, CancellationToken cancellationToken = default)
+        [HttpGet("{eventId}")]
+        public async Task<IActionResult> GetEventById([FromRoute] Guid eventId,
+            CancellationToken cancellationToken)
         {
-            GetEventByIdQuery query = new()
-            {
-                Id = id,
-                UserId = User.GetUserIdFromJWT()
-            };
-            GetEventByIdResult result = await _mediator.Send(query, cancellationToken);
-            return Ok(result.SearchedEvent);
+            var query = new GetEventByIdQuery(eventId, GetUserId());
+            var result = await _sender.Send(query, cancellationToken);
+            return Ok(result.Event);
         }
 
         [HttpGet("events")]
-        public async Task<IActionResult> GetAllAccessibleEvents(CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetAllAccessibleEvents([FromQuery] bool owner,
+            CancellationToken cancellationToken)
         {
-            GetAllAccessibleEventsQuery query = new()
-            {
-                UserId = User.GetUserIdFromJWT()
-            };
-            GetAllAccessibleEventsResult result = await _mediator.Send(query, cancellationToken);
-            return result.Events.Equals(Enumerable.Empty<Event>()) ? NoContent() : Ok(result.Events);
+            var mode = owner ? EventQueryingMode.Owner : EventQueryingMode.Attendee;
+            var byUserQuery = new GetAllEventsByUserQuery(GetUserId(), mode);
+            var byUserQueryResult = await _sender.Send(byUserQuery, cancellationToken);
+            return byUserQueryResult.Events.Any()
+                ? Ok(byUserQueryResult.Events)
+                : NoContent();
         }
 
         /// <summary>
         /// Delete Event By Id
         /// </summary>
-        /// <param name="id">Id of searched event</param>
+        /// <param name="eventId">Id of searched event</param>
         /// <param name="cancellationToken">Cancellation Token</param>
         /// <returns></returns>
         /// <response code="204">Event deleted</response>
         /// <response code="404">Event not found</response>
         /// <response code="500">Server error</response>
-        [HttpDelete("{id}")]
-        [Authorize]
-        public async Task<IActionResult> DeleteEventById([FromRoute] string id, CancellationToken cancellationToken = default)
+        [HttpDelete("{eventId}")]
+        public async Task<IActionResult> DeleteEventById([FromRoute] Guid eventId,
+            CancellationToken cancellationToken)
         {
-            DeleteEventByIdCommand command = new()
-            {
-                Id = id,
-                UserId = User.GetUserIdFromJWT()
-            };
-            _ = await _mediator.Send(command, cancellationToken);
+            var command = new DeleteEventByIdCommand(eventId, GetUserId());
+            var result = await _sender.Send(command, cancellationToken);
             return NoContent();
         }
+
         /// <summary>
         /// Update Event By Id
         /// </summary>
-        /// <param name="id">Id of searched event</param>
+        /// <param name="eventId">Id of searched event</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <response code="204">Event updated</response>
         /// <response code="400">Bad request</response>
         /// <response code="404">Event not found</response>
         /// <response code="500">Server error</response>
-        [HttpPatch("{id}/cancel")]
-        [Authorize]
-        public async Task<IActionResult> CancelEventById([FromRoute] string id, CancellationToken cancellationToken = default)
+        [HttpPatch("{eventId}/cancel")]
+        public async Task<IActionResult> CancelEventById([FromRoute] Guid eventId,
+            CancellationToken cancellationToken)
         {
-            CancelEventByIdCommand command = new()
-            {
-                Id = id,
-                UserId = User.GetUserIdFromJWT()
-            };
-            _ = await _mediator.Send(command, cancellationToken);
+            var command = new CancelEventByIdCommand(eventId, GetUserId());
+            var result = await _sender.Send(command, cancellationToken);
             return NoContent();
         }
+
         /// <summary>
         /// Send RSVP for event
         /// </summary>
         /// <param name="emailRequest">Email of invited user</param>
-        /// <param name="id">Id of event</param>
+        /// <param name="eventId">Id of event</param>
         /// <param name="cancellationToken"></param>
         /// <returns>Id of RSVP</returns>
         /// <response code="201">RSVP created</response>
         /// <response code="400">Bad request</response>
         /// <response code="404">Event not found</response>
         /// <response code="500">Server error</response>
-        [HttpPost("{id}/invite")]
-        [Authorize]
-        public async Task<IActionResult> SendRSVP([FromBody] EmailRequest emailRequest, [FromRoute] string id, CancellationToken cancellationToken = default)
+        [HttpPost("/{eventId}/invites")]
+        public async Task<IActionResult> SendRSVP([FromBody] string email, [FromRoute] Guid eventId,
+            CancellationToken cancellationToken)
         {
-            ValidationResult validationResult = await _emailRequestValidator.ValidateAsync(emailRequest, cancellationToken);
-            if (!validationResult.IsValid)
-            {
-                validationResult.AddToModelState(ModelState);
-                return BadRequest(ModelState);
-            }
-            SendRSVPCommand request = new()
-            {
-                UserOwnerId = User.GetUserIdFromJWT(),
-                UserInviteEmail = emailRequest.Email,
-                EventId = id
-            };
-            SendRSVPResult result = await _mediator.Send(request, cancellationToken);
-            return Created($"{result.RSVPId}", result);
+            var request = new SendRSVPCommand(GetUserId(), email, eventId);
+            var result = await _sender.Send(request, cancellationToken);
+            return CreatedAtRoute($"{result.RSVPId}", result);
         }
+
         /// <summary>
         /// Get RSVPs for event
         /// </summary>
-        /// <param name="id">Id of event</param>
+        /// <param name="eventId">Id of event</param>
         /// <param name="cancellationToken"></param>
         /// <returns>List of RSVPs for event</returns>
         /// <response code="200">Returns list of RSVPs</response>
         /// <response code="404">Event not found</response>
         /// <response code="500">Server error</response>
-        [HttpGet("{id}/invited")]
-        [Authorize]
-        public async Task<IActionResult> GetRSVPsForEvent([FromRoute] string id, CancellationToken cancellationToken = default)
+        [HttpGet("{eventId}/invites")]
+        public async Task<IActionResult> GetRSVPsForEvent([FromRoute] Guid eventId,
+            CancellationToken cancellationToken)
         {
-            GetEventsRSVPQuery query = new()
-            {
-                EventId = id,
-                UserId = User.GetUserIdFromJWT()
-            };
-            GetEventsRSVPResult result = await _mediator.Send(query, cancellationToken);
-            return result.RSVPs.Equals(Enumerable.Empty<RSVP>()) ? NoContent() : Ok(result.RSVPs);
+            var query = new GetEventsRSVPQuery(eventId, GetUserId());
+            var queryResult = await _sender.Send(query, cancellationToken);
+            return queryResult.RSVPs.Any()
+                ? Ok(queryResult.RSVPs)
+                : NoContent();
+        }
+
+        [HttpGet("{eventId}/attendees")]
+        public async Task<IActionResult> GetAttendeesForEvent([FromRoute] Guid eventId,
+            CancellationToken cancellationToken)
+        {
+            var query = new GetAllAttendeesByEventQuery(eventId, GetUserId());
+            var queryResult = await _sender.Send(query, cancellationToken);
+            return queryResult.Attendees.Any()
+                ? Ok(queryResult.Attendees)
+                : NoContent();
+        }
+        
+        
+        [HttpPatch("{eventId}/invites")]
+        public async Task<IActionResult> RespondToRsvp([FromRoute] Guid eventId, [FromBody] bool isAccepted, CancellationToken cancellationToken)
+        {
+            var command = new UpdateRSVPStatusCommand(isAccepted, eventId, GetUserId());
+            var result = await _sender.Send(command, cancellationToken);
+            return NoContent();
         }
     }
 }

@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using Application.Commands.RSVPCommands;
+using Application.Commands.RSVPs;
 
 using Domain.Aggregates.Events;
 using Domain.Enums;
@@ -37,11 +37,11 @@ namespace UnitTests.Commands.RSVPCommands
             UpdateRSVPStatusCommand command = new()
             {
                 RSVPAccepted = true,
-                RSVPId = "rsvp123",
+                EventId = "rsvp123",
                 UserId = "user123"
             };
 
-            _ = _rsvpRepositoryMock.Setup(r => r.IsUserInvited(command.UserId, command.RSVPId, CancellationToken.None))
+            _ = _rsvpRepositoryMock.Setup(r => r.IsUserInvited(command.UserId, command.EventId, CancellationToken.None))
                                    .ReturnsAsync(true);
 
             // Act
@@ -58,11 +58,11 @@ namespace UnitTests.Commands.RSVPCommands
             UpdateRSVPStatusCommand command = new()
             {
                 RSVPAccepted = true,
-                RSVPId = "rsvp123",
+                EventId = "rsvp123",
                 UserId = "user123"
             };
 
-            _ = _rsvpRepositoryMock.Setup(r => r.IsUserInvited(command.UserId, command.RSVPId, CancellationToken.None))
+            _ = _rsvpRepositoryMock.Setup(r => r.IsUserInvited(command.UserId, command.EventId, CancellationToken.None))
                                    .ReturnsAsync(false);
 
             // Assert
@@ -75,16 +75,16 @@ namespace UnitTests.Commands.RSVPCommands
             UpdateRSVPStatusCommand command = new()
             {
                 RSVPAccepted = true,
-                RSVPId = "rsvp123",
+                EventId = "rsvp123",
                 UserId = "user123"
             };
-            _ = _rsvpRepositoryMock.Setup(r => r.IsUserInvited(command.UserId, command.RSVPId, CancellationToken.None))
+            _ = _rsvpRepositoryMock.Setup(r => r.IsUserInvited(command.UserId, command.EventId, CancellationToken.None))
                                    .ReturnsAsync(true);
             // Act
             _ = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
-            _unitOfWorkMock.Verify(r => r.RSVP.ChangeRSVPStatus(command.RSVPId, RSVPStatus.Accepted, CancellationToken.None), Times.Once);
+            _unitOfWorkMock.Verify(r => r.RSVP.ChangeRSVPStatus(command.EventId, RSVPStatus.Accepted, CancellationToken.None), Times.Once);
         }
 
         [Fact]
@@ -94,16 +94,16 @@ namespace UnitTests.Commands.RSVPCommands
             UpdateRSVPStatusCommand command = new()
             {
                 RSVPAccepted = false,
-                RSVPId = "rsvp456",
+                EventId = "rsvp456",
                 UserId = "user456"
             };
-            _ = _rsvpRepositoryMock.Setup(r => r.IsUserInvited(command.UserId, command.RSVPId, CancellationToken.None))
+            _ = _rsvpRepositoryMock.Setup(r => r.IsUserInvited(command.UserId, command.EventId, CancellationToken.None))
                                    .ReturnsAsync(true);
             // Act
             _ = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
-            _unitOfWorkMock.Verify(r => r.RSVP.ChangeRSVPStatus(command.RSVPId, RSVPStatus.Declined, CancellationToken.None), Times.Once);
+            _unitOfWorkMock.Verify(r => r.RSVP.ChangeRSVPStatus(command.EventId, RSVPStatus.Declined, CancellationToken.None), Times.Once);
         }
     }
 }

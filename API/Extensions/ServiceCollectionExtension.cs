@@ -1,49 +1,20 @@
 using System;
 using System.IO;
 using System.Reflection;
-using System.Text;
 
 using API.Validators;
 
-using Application.Commands.AuthCommands;
-using Application.Commands.EventCommands;
-using Application.MapperProfiles;
-
-using AutoMapper;
-
-using Contracts.RequestModels;
+using Application.Commands.Auth;
 
 using FluentValidation;
 
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 namespace API.Extensions
 {
     public static class ServiceCollectionExtension
     {
-        public static void RegisterMediatR(this IServiceCollection services)
-        {
-            _ = services.AddMediatR(c => c.RegisterServicesFromAssemblies(typeof(CreateEventCommand).Assembly));
-        }
-        public static void ConfigureMapping(this IServiceCollection services)
-        {
-            _ = services.AddSingleton(_ =>
-                {
-                    MapperConfiguration mc = new(map =>
-                    {
-                        map.AddProfile<EventProfile>();
-                        map.AddProfile<RSVPProfile>();
-                        map.AddProfile<UserProfile>();
-                    }
-                    );
-                    return mc.CreateMapper();
-                });
-        }
-
         public static void ConfigureSwagger(this IServiceCollection services)
         {
             _ = services.AddSwaggerGen(options =>
@@ -92,8 +63,6 @@ namespace API.Extensions
         }
         public static void ConfigureValidation(this IServiceCollection services)
         {
-            _ = services.AddScoped<IValidator<CreateEventRequest>, CreateEventValidator>();
-            _ = services.AddScoped<IValidator<EmailRequest>, EmailRequestValidator>();
             _ = services.AddScoped<IValidator<LoginUserCommand>, LoginUserValidator>();
             _ = services.AddScoped<IValidator<RegisterUserCommand>, RegisterUserValidator>();
         }

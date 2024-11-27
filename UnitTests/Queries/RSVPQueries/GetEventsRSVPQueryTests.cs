@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Application.Queries.RSVPQueries;
+using Application.Queries.RSVPs;
 
 using AutoMapper;
 
@@ -38,7 +38,7 @@ namespace UnitTests.Queries.RSVPQueries
             GetEventsRSVPQuery query = new()
             {
                 EventId = "event123",
-                UserId = "user123"
+                OwnerId = "user123"
             };
 
             IEnumerable<RSVPDTO> rsvpDtos = new List<RSVPDTO>
@@ -55,7 +55,7 @@ namespace UnitTests.Queries.RSVPQueries
                 new RSVP { Id = "rsvp3", UserEmail = "user3", EventTitle = "event123" }
             };
 
-            _ = _unitOfWorkMock.Setup(r => r.Event.IsUserOwner(query.UserId, query.EventId, CancellationToken.None))
+            _ = _unitOfWorkMock.Setup(r => r.Event.IsUserOwner(query.OwnerId, query.EventId, CancellationToken.None))
                                       .ReturnsAsync(true);
 
             _ = _unitOfWorkMock.Setup(r => r.RSVP.GetAllRSVPsForEvent(query.EventId, CancellationToken.None))
@@ -65,11 +65,11 @@ namespace UnitTests.Queries.RSVPQueries
                             .Returns(mappedRSVPs);
 
             // Act
-            GetEventsRSVPResult result = await _handler.Handle(query, CancellationToken.None);
+            GetEventsRSVPQueryResult queryResult = await _handler.Handle(query, CancellationToken.None);
 
             // Assert
-            Assert.NotNull(result);
-            Assert.Equal(mappedRSVPs, result.RSVPs);
+            Assert.NotNull(queryResult);
+            Assert.Equal(mappedRSVPs, queryResult.RSVPs);
         }
 
         [Fact]
@@ -79,10 +79,10 @@ namespace UnitTests.Queries.RSVPQueries
             GetEventsRSVPQuery query = new()
             {
                 EventId = "event123",
-                UserId = "user123"
+                OwnerId = "user123"
             };
 
-            _ = _unitOfWorkMock.Setup(r => r.Event.IsUserOwner(query.UserId, query.EventId, CancellationToken.None))
+            _ = _unitOfWorkMock.Setup(r => r.Event.IsUserOwner(query.OwnerId, query.EventId, CancellationToken.None))
                                       .ReturnsAsync(false);
 
             // Assert

@@ -2,7 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Application.Commands.EventCommands;
+using Application.Commands.Events;
 
 using Domain.Aggregates.Events;
 using Domain.Models.Database;
@@ -33,7 +33,7 @@ namespace UnitTests.Commands.EventCommands
             {
                 Title = "Test Event",
                 Description = "Test event description",
-                Date = DateTime.Now,
+                StartDate = DateTime.Now,
                 Duration = 3600, // 1 hour in seconds
                 Location = "Test Location",
                 IsPublic = true,
@@ -45,7 +45,7 @@ namespace UnitTests.Commands.EventCommands
                 Id = "event123",
                 Title = command.Title,
                 Description = command.Description,
-                Date = command.Date,
+                Date = command.StartDate,
                 Duration = TimeSpan.FromSeconds(command.Duration),
                 Location = command.Location,
                 OwnerId = command.UserId,
