@@ -1,13 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 using Application.Enums;
-using Application.Interfaces;
-using Application.Queries.Models;
-
-using MediatR;
+using Application.Interfaces.Repositories;
+using Application.Models;
 
 namespace Application.Queries.Events;
 

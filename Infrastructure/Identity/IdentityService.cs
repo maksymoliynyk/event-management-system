@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,12 +22,12 @@ public class IdentityService : IIdentityService
 
     public Task ChangePasswordAsync()
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
 
     public Task GenerateResetPasswordTokenAsync(string email)
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
 
     public async Task<string> LoginUserAsync(string email, string password, CancellationToken ct)
@@ -35,14 +36,14 @@ public class IdentityService : IIdentityService
         var result = await _userManager.CheckPasswordAsync(user, password);
         return result ?
             _tokenProvider.GetToken(user) :
-            throw new LoginException(LoginExceptionError.PasswordIncorrect, "Password incorrect");
+            throw new Exception("Password incorrect");
     }
 
     public async Task<IdentityResult> RegisterUserAsync(string email, string password, string firstName, string lastName, CancellationToken ct)
     {
         if (await GetUserByEmail(email) != null)
         {
-            throw new System.Exception("User exist");
+            throw new ObjectAlreadyExistException(EntitiesErrorType.User);
         }
         
         var user = new User
@@ -58,11 +59,16 @@ public class IdentityService : IIdentityService
 
     public Task ResetPasswordAsync()
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
 
     public async Task<User> GetUserByEmail(string email)
     {
         return await _userManager.FindByEmailAsync(email);
+    }
+
+    public void Dispose()
+    {
+        _userManager.Dispose();
     }
 }

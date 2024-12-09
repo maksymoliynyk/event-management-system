@@ -2,12 +2,6 @@ using System;
 using System.IO;
 using System.Reflection;
 
-using API.Validators;
-
-using Application.Commands.Auth;
-
-using FluentValidation;
-
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 
@@ -60,11 +54,6 @@ namespace API.Extensions
                                 builder => _ = builder.AllowAnyOrigin()
                                         .AllowAnyHeader()
                                         .AllowAnyMethod()));
-        }
-        public static void ConfigureValidation(this IServiceCollection services)
-        {
-            _ = services.AddScoped<IValidator<LoginUserCommand>, LoginUserValidator>();
-            _ = services.AddScoped<IValidator<RegisterUserCommand>, RegisterUserValidator>();
         }
     }
 }

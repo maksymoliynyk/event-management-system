@@ -24,8 +24,7 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
             .IsRequired();
 
         builder.Property(e => e.Description)
-            .HasMaxLength(500)
-            .IsRequired();
+            .HasMaxLength(500);
 
         builder.Property(e => e.StartDate)
             .IsRequired();
@@ -34,8 +33,7 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
             .IsRequired();
 
         builder.Property(e => e.Location)
-            .HasMaxLength(100)
-            .IsRequired();
+            .HasMaxLength(100);
 
         builder.Property(e => e.Status)
             .HasConversion<byte>()

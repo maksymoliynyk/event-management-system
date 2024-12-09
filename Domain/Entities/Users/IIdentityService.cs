@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -5,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Domain.Entities.Users;
 
-public interface IIdentityService
+public interface IIdentityService : IDisposable
 {
     // todo: fill parameters from use cases
     Task<string> LoginUserAsync(string email, string password, CancellationToken ct);

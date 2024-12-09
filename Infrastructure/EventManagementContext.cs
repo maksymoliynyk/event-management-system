@@ -12,7 +12,6 @@ namespace Infrastructure;
 public class EventManagementContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 {
     public DbSet<Event> Events { get; set; }
-    public DbSet<RSVP> RSPVs { get; set; }
 
     public EventManagementContext(DbContextOptions<EventManagementContext> options) : base(options) { }
 

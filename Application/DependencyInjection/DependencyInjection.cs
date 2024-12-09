@@ -1,4 +1,4 @@
-﻿using Application.Commands.Events;
+﻿using Application.Common;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -8,7 +8,13 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        services.AddMediatR(c => c.RegisterServicesFromAssemblies(typeof(DependencyInjection).Assembly));
+        services.AddMediatR(c =>
+        {
+            c.RegisterServicesFromAssemblies(typeof(DependencyInjection).Assembly);
+            c.AddOpenBehavior(typeof(ValidationBehavior<,>));
+        });
+        
+        services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
 
         return services;
     }

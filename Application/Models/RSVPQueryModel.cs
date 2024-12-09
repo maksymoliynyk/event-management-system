@@ -2,7 +2,7 @@
 
 using Domain.Enums;
 
-namespace Application.Queries.Models;
+namespace Application.Models;
 
 public class RSVPQueryModel
 {

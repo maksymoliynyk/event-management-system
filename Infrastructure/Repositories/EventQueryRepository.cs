@@ -5,8 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Application.Enums;
-using Application.Interfaces;
-using Application.Queries.Models;
+using Application.Interfaces.Repositories;
+using Application.Models;
 
 using Dapper;
 

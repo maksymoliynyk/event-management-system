@@ -1,5 +1,7 @@
 ﻿using System;
 
+using API.Filters;
+
 using MediatR;
 
 using Microsoft.AspNetCore.Cors;
@@ -9,6 +11,7 @@ using Microsoft.Extensions.Logging;
 namespace API.Controllers;
 
 [EnableCors("AllowAllHeaders")]
+[TypeFilter(typeof(DomainExceptionFilter))]
 public class BaseController : ControllerBase
 {
     protected readonly ILogger<BaseController> _logger;

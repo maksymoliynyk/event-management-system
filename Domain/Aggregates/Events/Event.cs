@@ -53,7 +53,7 @@ public class Event
             throw new Exception("Event already cancelled");
         }
 
-        if (StartDate.Add(Duration) > DateTime.UtcNow || Status == EventStatus.Finished)
+        if (StartDate.Add(Duration) < DateTime.UtcNow || Status == EventStatus.Finished)
         {
             throw new Exception("Event already ended");
         }

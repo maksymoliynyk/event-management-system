@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-using Application.Interfaces;
+using Application.Interfaces.Repositories;
 
 using Domain.Aggregates.Events;
 using Domain.Entities.Users;
@@ -26,15 +26,18 @@ public static class DependencyInjection
     public static IServiceCollection AddCustomOptions(this IServiceCollection services)
     {
         services.ConfigureOptions<JwtOptionSetup>();
+        services.ConfigureOptions<ConnectionStringsOptionSetup>();
 
         return services;
     }
 
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        // TODO: fix config
+        var connectionStringsOption =
+            services.BuildServiceProvider().GetRequiredService<IOptions<ConnectionStringsOption>>().Value;
+
         services.AddDbContext<EventManagementContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            options.UseSqlServer(connectionStringsOption.DefaultConnection));
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IEventRepository, EventRepository>();
@@ -43,7 +46,7 @@ public static class DependencyInjection
 
         services.AddScoped<IEventQueryRepository>(_ =>
         {
-            var connectionString = configuration.GetConnectionString("ReadOnlyConnection");
+            var connectionString = connectionStringsOption.ReadOnlyConnection;
             var dbConnection = new SqlConnection(connectionString);
             return new EventQueryRepository(dbConnection);
         });
@@ -71,7 +74,7 @@ public static class DependencyInjection
             {
                 using var serviceProvider = services.BuildServiceProvider();
                 var jwtOptions = serviceProvider.GetRequiredService<IOptions<JwtOption>>().Value;
-                
+
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,

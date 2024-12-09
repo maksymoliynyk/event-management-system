@@ -13,8 +13,11 @@ using System.Linq;
 
 using API.Models;
 
-using Application.Commands.Events;
-using Application.Commands.RSVPs;
+using Application.Commands.Events.Cancel;
+using Application.Commands.Events.Create;
+using Application.Commands.Events.Delete;
+using Application.Commands.RSVPs.Send;
+using Application.Commands.RSVPs.Update;
 using Application.Enums;
 using Application.Queries.Attendees;
 using Application.Queries.Events;
@@ -27,7 +30,6 @@ namespace API.Controllers
     [ApiController]
     [Authorize]
     [Route("[controller]")]
-    [TypeFilter(typeof(EventControllerExceptionFilter))]
     public class EventsController : BaseController
     {
         public EventsController(ILogger<EventsController> logger, ISender sender) : base(logger, sender)
@@ -55,7 +57,7 @@ namespace API.Controllers
                 request.Location,
                 GetUserId());
             var result = await _sender.Send(command, cancellationToken);
-            return CreatedAtRoute($"{result.Id}", result);
+            return Created($"{result.Id}", result.Id);
         }
 
         /// <summary>
@@ -76,7 +78,7 @@ namespace API.Controllers
             return Ok(result.Event);
         }
 
-        [HttpGet("events")]
+        [HttpGet]
         public async Task<IActionResult> GetAllAccessibleEvents([FromQuery] bool owner,
             CancellationToken cancellationToken)
         {
@@ -175,10 +177,10 @@ namespace API.Controllers
                 ? Ok(queryResult.Attendees)
                 : NoContent();
         }
-        
-        
+
         [HttpPatch("{eventId}/invites")]
-        public async Task<IActionResult> RespondToRsvp([FromRoute] Guid eventId, [FromBody] bool isAccepted, CancellationToken cancellationToken)
+        public async Task<IActionResult> RespondToRsvp([FromRoute] Guid eventId, [FromBody] bool isAccepted,
+            CancellationToken cancellationToken)
         {
             var command = new UpdateRSVPStatusCommand(isAccepted, eventId, GetUserId());
             var result = await _sender.Send(command, cancellationToken);

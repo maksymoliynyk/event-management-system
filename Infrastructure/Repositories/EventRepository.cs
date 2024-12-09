@@ -3,6 +3,8 @@ using System.Linq;
 
 using Domain.Aggregates.Events;
 
+using Microsoft.EntityFrameworkCore;
+
 namespace Infrastructure.Repositories;
 
 public class EventRepository : IEventRepository
@@ -21,7 +23,10 @@ public class EventRepository : IEventRepository
 
     public Event GetById(Guid eventId)
     {
-        return _context.Events.FirstOrDefault(e => e.Id == eventId);
+        return _context.Events
+            .Include(x => x.Attendees)
+            .Include(x => x.RSVPs)
+            .FirstOrDefault(e => e.Id == eventId);
     }
 
     public void Delete(Event @event)
@@ -31,7 +36,10 @@ public class EventRepository : IEventRepository
 
     public Event GetById(Guid eventId, Guid ownerId)
     {
-        return _context.Events.FirstOrDefault(e => e.OwnerId == ownerId && e.Id == eventId);
+        return _context.Events
+            .Include(x => x.Attendees)
+            .Include(x => x.RSVPs)
+            .FirstOrDefault(e => e.OwnerId == ownerId && e.Id == eventId);
     }
 
     public void Update(Event @event)

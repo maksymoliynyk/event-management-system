@@ -1,19 +1,12 @@
-using System;
+namespace Domain.Exceptions;
 
-namespace Domain.Exceptions
+public class ObjectNotFoundException : Exception
 {
-    public enum ObjectNotFoundErrors
+    public EntitiesErrorType ErrorCode { get; }
+
+    public ObjectNotFoundException(EntitiesErrorType errorCode)
+        : base($"{errorCode} not found.")
     {
-        User,
-        Event,
-        RSVP
-    }
-    public class ObjectNotFoundException : Exception
-    {
-        public ObjectNotFoundErrors Error { get; init; }
-        public ObjectNotFoundException(string message, ObjectNotFoundErrors error) : base(message)
-        {
-            Error = error;
-        }
+        ErrorCode = errorCode;
     }
 }
