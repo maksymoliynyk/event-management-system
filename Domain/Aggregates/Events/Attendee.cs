@@ -1,5 +1,3 @@
-using System;
-
 using Domain.Entities.Users;
 
 namespace Domain.Aggregates.Events;

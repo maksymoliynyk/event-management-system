@@ -1,5 +1,3 @@
-using System;
-
 using Domain.Interfaces;
 
 namespace Application.Commands.Events.Delete;
@@ -16,11 +14,6 @@ public class DeleteEventByIdCommandHandler : IRequestHandler<DeleteEventByIdComm
     public async Task<DeleteEventByIdResult> Handle(DeleteEventByIdCommand request, CancellationToken cancellationToken)
     {
         var @event = _unitOfWork.Event.GetById(request.Id, request.UserId);
-
-        if (@event == null)
-        {
-            throw new NullReferenceException($"Event with id {request.Id} was not found");
-        }
 
         _unitOfWork.Event.Delete(@event);
         await _unitOfWork.SaveAsync(cancellationToken);

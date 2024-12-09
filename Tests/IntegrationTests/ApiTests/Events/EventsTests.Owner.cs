@@ -20,15 +20,16 @@ public partial class EventsTests : BaseApiTests
     }
 
     [Fact]
-    public async Task CreateValidEventShouldBeSuccessful()
+    public async Task CreateEvent_WithValidModel_ShouldSuccess()
     {
         (HttpClient client, string email) = await CreateValidUser();
         var userId = await GetUserId(email);
 
         var @event = new CreateEventRequestModel(Company.Name(), Lorem.Sentence(10), DateTime.UtcNow.AddDays(1),
             (long)TimeSpan.FromHours(1).TotalSeconds, Address.StreetAddress());
-        (HttpStatusCode code, Guid eventId) = await client.CreateEvent(@event);
+        (HttpStatusCode code, string response) = await client.CreateEvent(@event);
         StatusCodeIsSuccessful(code);
+        var eventId = Guid.Parse(JsonConvert.DeserializeObject<string>(response));
 
         using var unitOfWork = InitUnitOfWork();
         var dbEvent = unitOfWork.Event.GetById(eventId);
@@ -44,7 +45,22 @@ public partial class EventsTests : BaseApiTests
     }
 
     [Fact]
-    public async Task GetEventByIdShouldReturnCorrectEvent()
+    public async Task CreateEvent_WithInvalidModel_ShouldFail()
+    {
+        (HttpClient client, string email) = await CreateValidUser();
+        var userId = await GetUserId(email);
+
+        var @event = new CreateEventRequestModel(GenerateRandomWord(101), GenerateRandomWord(501),
+            DateTime.UtcNow.AddDays(-11),
+            -1, GenerateRandomWord(101));
+        (HttpStatusCode code, string response) = await client.CreateEvent(@event);
+        code.Should().Be(HttpStatusCode.BadRequest);
+
+        _logger.Information(response);
+    }
+
+    [Fact]
+    public async Task GetEventById_WithValidId_ShouldSuccess()
     {
         (HttpClient client, string email) = await CreateValidUser();
         var userId = await GetUserId(email);
@@ -69,7 +85,19 @@ public partial class EventsTests : BaseApiTests
     }
 
     [Fact]
-    public async Task GetAllEventAsOwnerShouldReturnCorrectEvents()
+    public async Task GetEventById_WithInvalidId_ShouldSuccess_AndReturnNull()
+    {
+        (HttpClient client, _) = await CreateValidUser();
+
+        (HttpStatusCode code, string response) = await client.GetEventById(Guid.NewGuid());
+        StatusCodeIsSuccessful(code);
+
+        var eventResponse = JsonConvert.DeserializeObject<EventQueryModel>(response);
+        eventResponse.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task GetAllEvent_AsOwner_WithManyEvents_ShouldSuccess()
     {
         (HttpClient client, string email) = await CreateValidUser();
         var userId = await GetUserId(email);
@@ -97,7 +125,20 @@ public partial class EventsTests : BaseApiTests
     }
 
     [Fact]
-    public async Task DeleteEventShouldBeSuccessful()
+    public async Task GetAllEvent_AsOwner_WithoutEvents_ShouldSuccess_AndReturnEmptyCollection()
+    {
+        (HttpClient client, _) = await CreateValidUser();
+
+        (HttpStatusCode code, string response) = await client.GetEventForUser(true);
+        StatusCodeIsSuccessful(code);
+
+        var eventResponse = JsonConvert.DeserializeObject<IEnumerable<EventQueryModel>>(response);
+
+        eventResponse.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task DeleteEvent_WithValidId_ShouldSuccess()
     {
         (HttpClient client, string email) = await CreateValidUser();
         var userId = await GetUserId(email);
@@ -108,14 +149,20 @@ public partial class EventsTests : BaseApiTests
         (HttpStatusCode code, string response) = await client.DeleteEvent(newEvent.Id);
         StatusCodeIsSuccessful(code);
         string.IsNullOrWhiteSpace(response).Should().BeTrue();
-
-        using var unitOfWork = InitUnitOfWork();
-        var dbEvent = unitOfWork.Event.GetById(newEvent.Id);
-        dbEvent.Should().BeNull();
     }
 
     [Fact]
-    public async Task CancelEventShouldBeSuccessful()
+    public async Task DeleteEvent_WithInvalidId_ShouldFail()
+    {
+        (HttpClient client, _) = await CreateValidUser();
+
+        (HttpStatusCode code, string response) = await client.DeleteEvent(Guid.NewGuid());
+        code.Should().Be(HttpStatusCode.NotFound);
+        _logger.Information(response);
+    }
+
+    [Fact]
+    public async Task CancelEvent_WithValidData_ShouldSuccess()
     {
         (HttpClient client, string email) = await CreateValidUser();
         var userId = await GetUserId(email);

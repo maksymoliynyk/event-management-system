@@ -1,8 +1,4 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-
-using Domain.Aggregates.Events;
+﻿using Domain.Aggregates.Events;
 
 namespace Domain.Interfaces;
 

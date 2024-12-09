@@ -33,26 +33,24 @@ public class IdentityService : IIdentityService
     public async Task<string> LoginUserAsync(string email, string password, CancellationToken ct)
     {
         var user = await GetUserByEmail(email);
-        var result = await _userManager.CheckPasswordAsync(user, password);
-        return result ?
-            _tokenProvider.GetToken(user) :
-            throw new Exception("Password incorrect");
+
+        if (!await _userManager.CheckPasswordAsync(user, password))
+        {
+            throw new LoginException("Wrong email or password");
+        }
+
+        return _tokenProvider.GetToken(user);
     }
 
-    public async Task<IdentityResult> RegisterUserAsync(string email, string password, string firstName, string lastName, CancellationToken ct)
+    public async Task<IdentityResult> RegisterUserAsync(string email, string password, string firstName,
+        string lastName, CancellationToken ct)
     {
         if (await GetUserByEmail(email) != null)
         {
             throw new ObjectAlreadyExistException(EntitiesErrorType.User);
         }
-        
-        var user = new User
-        {
-            UserName = email,
-            Email = email,
-            FirstName = firstName,
-            LastName = lastName
-        };
+
+        var user = new User { UserName = email, Email = email, FirstName = firstName, LastName = lastName };
         var result = await _userManager.CreateAsync(user, password);
         return result;
     }

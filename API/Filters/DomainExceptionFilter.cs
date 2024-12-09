@@ -9,14 +9,18 @@ public class DomainExceptionFilter : IExceptionFilter
 {
     public void OnException(ExceptionContext context)
     {
-        if (context.Exception is ObjectAlreadyExistException oaee)
+        context.Result = context.Exception switch
         {
-            context.Result = new BadRequestObjectResult(new { errorCode = oaee.ErrorCode, message = oaee.Message });
-        }
-
-        if (context.Exception is ObjectNotFoundException onfe)
-        {
-            context.Result = new NotFoundObjectResult(new { errorCode = onfe.ErrorCode, message = onfe.Message });
-        }
+            ObjectAlreadyExistException oaee => new BadRequestObjectResult(new
+            {
+                errorCode = oaee.ErrorCode, message = oaee.Message
+            }),
+            ObjectNotFoundException onfe => new NotFoundObjectResult(new
+            {
+                errorCode = onfe.ErrorCode, message = onfe.Message
+            }),
+            LoginException le => new BadRequestObjectResult(new { message = le.Message }),
+            _ => context.Result
+        };
     }
 }

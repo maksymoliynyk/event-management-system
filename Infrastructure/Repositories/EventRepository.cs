@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 
 using Domain.Aggregates.Events;
+using Domain.Exceptions;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -23,10 +24,16 @@ public class EventRepository : IEventRepository
 
     public Event GetById(Guid eventId)
     {
-        return _context.Events
+        var @event = _context.Events
             .Include(x => x.Attendees)
             .Include(x => x.RSVPs)
             .FirstOrDefault(e => e.Id == eventId);
+        if (@event == null)
+        {
+            throw new ObjectNotFoundException(EntitiesErrorType.Event);
+        }
+
+        return @event;
     }
 
     public void Delete(Event @event)
@@ -36,10 +43,16 @@ public class EventRepository : IEventRepository
 
     public Event GetById(Guid eventId, Guid ownerId)
     {
-        return _context.Events
+        var @event = _context.Events
             .Include(x => x.Attendees)
             .Include(x => x.RSVPs)
             .FirstOrDefault(e => e.OwnerId == ownerId && e.Id == eventId);
+        if (@event == null)
+        {
+            throw new ObjectNotFoundException(EntitiesErrorType.Event);
+        }
+
+        return @event;
     }
 
     public void Update(Event @event)

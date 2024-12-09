@@ -2,8 +2,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-using API.Filters;
-
 using MediatR;
 
 using Microsoft.AspNetCore.Authorization;
@@ -85,9 +83,7 @@ namespace API.Controllers
             var mode = owner ? EventQueryingMode.Owner : EventQueryingMode.Attendee;
             var byUserQuery = new GetAllEventsByUserQuery(GetUserId(), mode);
             var byUserQueryResult = await _sender.Send(byUserQuery, cancellationToken);
-            return byUserQueryResult.Events.Any()
-                ? Ok(byUserQueryResult.Events)
-                : NoContent();
+            return Ok(byUserQueryResult.Events);
         }
 
         /// <summary>

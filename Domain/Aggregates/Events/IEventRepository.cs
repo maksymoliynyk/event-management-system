@@ -1,5 +1,3 @@
-using System;
-
 namespace Domain.Aggregates.Events;
 
 public interface IEventRepository

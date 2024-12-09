@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
+using static Infrastructure.Constants.DbContextConstants;
+
 namespace Infrastructure;
 
 public class EventManagementContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
@@ -27,7 +29,7 @@ public class EventManagementContext : IdentityDbContext<User, IdentityRole<Guid>
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        builder.HasDefaultSchema("eventmanagement");
+        builder.HasDefaultSchema(DefaultSchema);
         builder.ApplyConfigurationsFromAssembly(typeof(EventManagementContext).Assembly);
     }
 }

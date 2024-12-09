@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationTests.ApiTests;
 
+[Collection("IntegrationTests")]
 public class BaseApiTests : BaseTestsLogging, IClassFixture<WebApiClientTestFixture>
 {
     protected const string ValidPassword = "ValidPassword1234";
@@ -55,6 +56,8 @@ public class BaseApiTests : BaseTestsLogging, IClassFixture<WebApiClientTestFixt
         ((int)statusCode).Should().BeInRange(200, 299);
     }
 
+    #region Initialize DbServices
+
     protected static IUnitOfWork InitUnitOfWork()
     {
         var helper = new ConnectionStringHelper();
@@ -69,6 +72,10 @@ public class BaseApiTests : BaseTestsLogging, IClassFixture<WebApiClientTestFixt
         return new TestHelpingService();
     }
 
+    #endregion
+
+    #region CreateTestData
+
     protected static async Task<IEnumerable<TResult>> PerformManyAsync<T, TResult>(
         Func<T, CancellationToken, Task<TResult>> func, T input, int count)
     {
@@ -80,4 +87,26 @@ public class BaseApiTests : BaseTestsLogging, IClassFixture<WebApiClientTestFixt
 
         return tasks;
     }
+
+    public static string GenerateRandomWord(int length)
+    {
+        if (length <= 0)
+        {
+            throw new ArgumentException("Length must be greater than 0.", nameof(length));
+        }
+
+        const string characters =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{}|;:,.<>?";
+        var random = new Random();
+        var result = new char[length];
+
+        for (int i = 0; i < length; i++)
+        {
+            result[i] = characters[random.Next(characters.Length)];
+        }
+
+        return new string(result);
+    }
+
+    #endregion
 }

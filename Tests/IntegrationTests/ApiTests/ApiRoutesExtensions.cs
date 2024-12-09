@@ -1,5 +1,4 @@
-﻿using System.Net.Http.Json;
-using System.Text;
+﻿using System.Text;
 
 using Newtonsoft.Json;
 
@@ -44,7 +43,7 @@ public static class ApiRoutesExtensions
 
     #region Events
 
-    public static async Task<(HttpStatusCode Code, Guid EventId)> CreateEvent(this HttpClient client,
+    public static async Task<(HttpStatusCode Code, string response)> CreateEvent(this HttpClient client,
         object model)
     {
         const string route = "events";
@@ -52,7 +51,7 @@ public static class ApiRoutesExtensions
         var response = await client.PostAsync(route,
             new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json"));
 
-        return (response.StatusCode, Guid.Parse(await response.Content.ReadFromJsonAsync<string>()));
+        return (response.StatusCode, await response.Content.ReadAsStringAsync());
     }
 
     public static async Task<(HttpStatusCode Code, string Response)> GetEventById(this HttpClient client, Guid eventId)
