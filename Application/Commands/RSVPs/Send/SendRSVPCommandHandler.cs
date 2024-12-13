@@ -1,7 +1,7 @@
 using Domain.Entities.Users;
 using Domain.Interfaces;
 
-namespace Application.Commands.RSVPs.Send;
+namespace Application.Commands.RSVPs;
 
 public class SendRSVPCommandHandler : IRequestHandler<SendRSVPCommand, SendRSVPResult>
 {

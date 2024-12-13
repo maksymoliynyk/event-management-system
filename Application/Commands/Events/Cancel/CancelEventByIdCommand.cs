@@ -1,6 +1,6 @@
 using System;
 
-namespace Application.Commands.Events.Cancel;
+namespace Application.Commands.Events;
 
 public sealed record CancelEventByIdCommand(Guid Id, Guid UserId) : IRequest<CancelEventByIdResult>;
 

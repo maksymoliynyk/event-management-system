@@ -1,4 +1,4 @@
-namespace Application.Commands.Auth.Login;
+namespace Application.Commands.Auth;
 
 public sealed record LoginUserCommand(string Email, string Password) : IRequest<LoginUserResult>;
 

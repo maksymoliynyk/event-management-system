@@ -7,15 +7,10 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-using System.Linq;
-
 using API.Models;
 
-using Application.Commands.Events.Cancel;
-using Application.Commands.Events.Create;
-using Application.Commands.Events.Delete;
-using Application.Commands.RSVPs.Send;
-using Application.Commands.RSVPs.Update;
+using Application.Commands.Events;
+using Application.Commands.RSVPs;
 using Application.Enums;
 using Application.Queries.Attendees;
 using Application.Queries.Events;
@@ -67,7 +62,7 @@ namespace API.Controllers
         /// <response code="200">Returns the event</response>
         /// <response code="404">Event not found</response>
         /// <response code="500">Server error</response>
-        [HttpGet("{eventId}")]
+        [HttpGet("{eventId:guid}")]
         public async Task<IActionResult> GetEventById([FromRoute] Guid eventId,
             CancellationToken cancellationToken)
         {
@@ -95,7 +90,7 @@ namespace API.Controllers
         /// <response code="204">Event deleted</response>
         /// <response code="404">Event not found</response>
         /// <response code="500">Server error</response>
-        [HttpDelete("{eventId}")]
+        [HttpDelete("{eventId:guid}")]
         public async Task<IActionResult> DeleteEventById([FromRoute] Guid eventId,
             CancellationToken cancellationToken)
         {
@@ -114,33 +109,28 @@ namespace API.Controllers
         /// <response code="400">Bad request</response>
         /// <response code="404">Event not found</response>
         /// <response code="500">Server error</response>
-        [HttpPatch("{eventId}/cancel")]
+        [HttpPatch("{eventId:guid}/cancel")]
         public async Task<IActionResult> CancelEventById([FromRoute] Guid eventId,
             CancellationToken cancellationToken)
         {
             var command = new CancelEventByIdCommand(eventId, GetUserId());
             var result = await _sender.Send(command, cancellationToken);
-            return NoContent();
+            return Ok();
         }
-
         /// <summary>
-        /// Send RSVP for event
+        /// Invite user by email
         /// </summary>
-        /// <param name="emailRequest">Email of invited user</param>
-        /// <param name="eventId">Id of event</param>
+        /// <param name="requestModel"></param>
+        /// <param name="eventId"></param>
         /// <param name="cancellationToken"></param>
-        /// <returns>Id of RSVP</returns>
-        /// <response code="201">RSVP created</response>
-        /// <response code="400">Bad request</response>
-        /// <response code="404">Event not found</response>
-        /// <response code="500">Server error</response>
-        [HttpPost("/{eventId}/invites")]
-        public async Task<IActionResult> SendRSVP([FromBody] string email, [FromRoute] Guid eventId,
+        /// <returns></returns>
+        [HttpPost("{eventId:guid}/invites")]
+        public async Task<IActionResult> SendRSVP([FromBody] SendRSVPRequestModel requestModel, [FromRoute] Guid eventId,
             CancellationToken cancellationToken)
         {
-            var request = new SendRSVPCommand(GetUserId(), email, eventId);
+            var request = new SendRSVPCommand(GetUserId(), requestModel.Email, eventId);
             var result = await _sender.Send(request, cancellationToken);
-            return CreatedAtRoute($"{result.RSVPId}", result);
+            return Ok();
         }
 
         /// <summary>
@@ -152,35 +142,31 @@ namespace API.Controllers
         /// <response code="200">Returns list of RSVPs</response>
         /// <response code="404">Event not found</response>
         /// <response code="500">Server error</response>
-        [HttpGet("{eventId}/invites")]
+        [HttpGet("{eventId:guid}/invites")]
         public async Task<IActionResult> GetRSVPsForEvent([FromRoute] Guid eventId,
             CancellationToken cancellationToken)
         {
             var query = new GetEventsRSVPQuery(eventId, GetUserId());
             var queryResult = await _sender.Send(query, cancellationToken);
-            return queryResult.RSVPs.Any()
-                ? Ok(queryResult.RSVPs)
-                : NoContent();
+            return Ok(queryResult.RSVPs);
         }
 
-        [HttpGet("{eventId}/attendees")]
+        [HttpGet("{eventId:guid}/attendees")]
         public async Task<IActionResult> GetAttendeesForEvent([FromRoute] Guid eventId,
             CancellationToken cancellationToken)
         {
             var query = new GetAllAttendeesByEventQuery(eventId, GetUserId());
             var queryResult = await _sender.Send(query, cancellationToken);
-            return queryResult.Attendees.Any()
-                ? Ok(queryResult.Attendees)
-                : NoContent();
+            return Ok(queryResult.Attendees);
         }
 
-        [HttpPatch("{eventId}/invites")]
-        public async Task<IActionResult> RespondToRsvp([FromRoute] Guid eventId, [FromBody] bool isAccepted,
+        [HttpPatch("{eventId:guid}/invites")]
+        public async Task<IActionResult> RespondToRsvp([FromRoute] Guid eventId, [FromBody] RespondToRSVPRequestModel model,
             CancellationToken cancellationToken)
         {
-            var command = new UpdateRSVPStatusCommand(isAccepted, eventId, GetUserId());
+            var command = new UpdateRSVPStatusCommand(model.IsAccepted, eventId, GetUserId());
             var result = await _sender.Send(command, cancellationToken);
-            return NoContent();
+            return Ok();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Application.Commands.Auth.Register;
+﻿using Application.Commands.Auth;
 
 using IntegrationTests.ApiTests.TestClient;
 

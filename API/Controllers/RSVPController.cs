@@ -21,7 +21,7 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetRSVPById(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetRSVPsByUser(CancellationToken cancellationToken)
         {
             var query = new GetUsersRSVPQuery(GetUserId());
             var result = await _sender.Send(query, cancellationToken);

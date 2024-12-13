@@ -11,23 +11,20 @@ using IntegrationTests.ApiTests.TestClient;
 
 using Newtonsoft.Json;
 
-namespace IntegrationTests.ApiTests.Events;
+namespace IntegrationTests.ApiTests.Events.Owner;
 
-public partial class EventsTests : BaseApiTests
+public class EventCrud : BaseEventTests
 {
-    public EventsTests(WebApiClientTestFixture fixture, ITestOutputHelper outputHelper) : base(fixture, outputHelper)
+    public EventCrud(WebApiClientTestFixture fixture, ITestOutputHelper outputHelper) : base(fixture, outputHelper)
     {
     }
 
     [Fact]
     public async Task CreateEvent_WithValidModel_ShouldSuccess()
     {
-        (HttpClient client, string email) = await CreateValidUser();
-        var userId = await GetUserId(email);
-
         var @event = new CreateEventRequestModel(Company.Name(), Lorem.Sentence(10), DateTime.UtcNow.AddDays(1),
             (long)TimeSpan.FromHours(1).TotalSeconds, Address.StreetAddress());
-        (HttpStatusCode code, string response) = await client.CreateEvent(@event);
+        (HttpStatusCode code, string response) = await _ownerClient.CreateEvent(@event);
         StatusCodeIsSuccessful(code);
         var eventId = Guid.Parse(JsonConvert.DeserializeObject<string>(response));
 
@@ -41,19 +38,17 @@ public partial class EventsTests : BaseApiTests
         dbEvent.Status.Should().Be(EventStatus.InProgress);
         dbEvent.Attendees.Should().BeEmpty();
         dbEvent.RSVPs.Should().BeEmpty();
-        dbEvent.OwnerId.Should().Be(userId);
+        dbEvent.Location.Should().Be(@event.Location);
+        dbEvent.OwnerId.Should().Be(_ownerId);
     }
 
     [Fact]
     public async Task CreateEvent_WithInvalidModel_ShouldFail()
     {
-        (HttpClient client, string email) = await CreateValidUser();
-        var userId = await GetUserId(email);
-
         var @event = new CreateEventRequestModel(GenerateRandomWord(101), GenerateRandomWord(501),
             DateTime.UtcNow.AddDays(-11),
             -1, GenerateRandomWord(101));
-        (HttpStatusCode code, string response) = await client.CreateEvent(@event);
+        (HttpStatusCode code, string response) = await _ownerClient.CreateEvent(@event);
         code.Should().Be(HttpStatusCode.BadRequest);
 
         _logger.Information(response);
@@ -62,13 +57,10 @@ public partial class EventsTests : BaseApiTests
     [Fact]
     public async Task GetEventById_WithValidId_ShouldSuccess()
     {
-        (HttpClient client, string email) = await CreateValidUser();
-        var userId = await GetUserId(email);
-
         using var testService = InitTestService();
-        var newEvent = await testService.CreateEvent(userId, CancellationToken.None);
+        var newEvent = await testService.CreateEvent(_ownerId, CancellationToken.None);
 
-        (HttpStatusCode code, string response) = await client.GetEventById(newEvent.Id);
+        (HttpStatusCode code, string response) = await _ownerClient.GetEventById(newEvent.Id);
         StatusCodeIsSuccessful(code);
 
         var eventResponse = JsonConvert.DeserializeObject<EventQueryModel>(response);
@@ -81,19 +73,15 @@ public partial class EventsTests : BaseApiTests
         dbEvent.StartDate.Should().Be(eventResponse.StartDate);
         dbEvent.Duration.Should().Be(eventResponse.Duration);
         dbEvent.Status.Should().Be(EventStatus.InProgress);
-        dbEvent.OwnerId.Should().Be(userId);
+        dbEvent.OwnerId.Should().Be(_ownerId);
     }
 
     [Fact]
-    public async Task GetEventById_WithInvalidId_ShouldSuccess_AndReturnNull()
+    public async Task GetEventById_WithInvalidId_ShouldFail()
     {
-        (HttpClient client, _) = await CreateValidUser();
-
-        (HttpStatusCode code, string response) = await client.GetEventById(Guid.NewGuid());
-        StatusCodeIsSuccessful(code);
-
-        var eventResponse = JsonConvert.DeserializeObject<EventQueryModel>(response);
-        eventResponse.Should().BeNull();
+        (HttpStatusCode code, string response) = await _ownerClient.GetEventById(Guid.NewGuid());
+        code.Should().Be(HttpStatusCode.NotFound);
+        _logger.Information(response);
     }
 
     [Fact]
@@ -140,13 +128,10 @@ public partial class EventsTests : BaseApiTests
     [Fact]
     public async Task DeleteEvent_WithValidId_ShouldSuccess()
     {
-        (HttpClient client, string email) = await CreateValidUser();
-        var userId = await GetUserId(email);
-
         using var testService = InitTestService();
-        var newEvent = await testService.CreateEvent(userId, CancellationToken.None);
+        var newEvent = await testService.CreateEvent(_ownerId, CancellationToken.None);
 
-        (HttpStatusCode code, string response) = await client.DeleteEvent(newEvent.Id);
+        (HttpStatusCode code, string response) = await _ownerClient.DeleteEvent(newEvent.Id);
         StatusCodeIsSuccessful(code);
         string.IsNullOrWhiteSpace(response).Should().BeTrue();
     }
@@ -154,9 +139,7 @@ public partial class EventsTests : BaseApiTests
     [Fact]
     public async Task DeleteEvent_WithInvalidId_ShouldFail()
     {
-        (HttpClient client, _) = await CreateValidUser();
-
-        (HttpStatusCode code, string response) = await client.DeleteEvent(Guid.NewGuid());
+        (HttpStatusCode code, string response) = await _ownerClient.DeleteEvent(Guid.NewGuid());
         code.Should().Be(HttpStatusCode.NotFound);
         _logger.Information(response);
     }
@@ -164,18 +147,54 @@ public partial class EventsTests : BaseApiTests
     [Fact]
     public async Task CancelEvent_WithValidData_ShouldSuccess()
     {
-        (HttpClient client, string email) = await CreateValidUser();
-        var userId = await GetUserId(email);
-
         using var testService = InitTestService();
-        var newEvent = await testService.CreateEvent(userId, CancellationToken.None);
+        var newEvent = await testService.CreateEvent(_ownerId, CancellationToken.None);
 
-        (HttpStatusCode code, string response) = await client.CancelEvent(newEvent.Id);
+        (HttpStatusCode code, string response) = await _ownerClient.CancelEvent(newEvent.Id);
         StatusCodeIsSuccessful(code);
         string.IsNullOrWhiteSpace(response).Should().BeTrue();
 
         using var unitOfWork = InitUnitOfWork();
         var dbEvent = unitOfWork.Event.GetById(newEvent.Id);
         dbEvent.Status.Should().Be(EventStatus.Cancelled);
+    }
+
+    [Fact]
+    public async Task CancelEvent_WithNotOwnerUser_ShouldFail()
+    {
+        using var testService = InitTestService();
+        var newEvent = await testService.CreateEvent(_ownerId, CancellationToken.None);
+
+        (HttpClient secondClient, _) = await CreateValidUser();
+
+        (HttpStatusCode code, string response) = await secondClient.CancelEvent(newEvent.Id);
+        code.Should().Be(HttpStatusCode.NotFound);
+        _logger.Information(response);
+    }
+
+    [Fact]
+    public async Task CancelEvent_WithFinishedEventByDate_ShouldFail()
+    {
+        using var testService = InitTestService();
+        var newEventId = await testService.CreateEventToCorruptData(_ownerId, CancellationToken.None,
+            startDate: DateTime.UtcNow.AddDays(-1));
+
+        (HttpStatusCode code, string response) = await _ownerClient.CancelEvent(newEventId);
+        code.Should().Be(HttpStatusCode.BadRequest);
+        _logger.Information(response);
+    }
+
+    [Theory]
+    [InlineData(EventStatus.Cancelled)]
+    [InlineData(EventStatus.Finished)]
+    public async Task CancelEvent_WithCompletedStatuses_ShouldFail(EventStatus completedStatus)
+    {
+        using var testService = InitTestService();
+        var newEventId =
+            await testService.CreateEventToCorruptData(_ownerId, CancellationToken.None, status: completedStatus);
+
+        (HttpStatusCode code, string response) = await _ownerClient.CancelEvent(newEventId);
+        code.Should().Be(HttpStatusCode.BadRequest);
+        _logger.Information(response);
     }
 }

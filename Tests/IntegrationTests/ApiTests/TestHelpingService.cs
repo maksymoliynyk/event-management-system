@@ -1,9 +1,15 @@
-﻿using Domain.Aggregates.Events;
+﻿using System.Data;
+
+using Dapper;
+
+using Domain.Aggregates.Events;
 using Domain.Enums;
 using Domain.Interfaces;
 
 using Infrastructure;
+using Infrastructure.Options;
 
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 using static Infrastructure.Constants.DbContextConstants;
@@ -13,10 +19,12 @@ namespace IntegrationTests.ApiTests;
 public class TestHelpingService : IDisposable
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ConnectionStringsOption _connectionStrings;
 
     public TestHelpingService()
     {
         var helper = new ConnectionStringHelper();
+        _connectionStrings = helper.Options;
         var context = new EventManagementContext(new DbContextOptionsBuilder<EventManagementContext>()
             .UseSqlServer(helper.Options.DefaultConnection)
             .Options);
@@ -58,26 +66,27 @@ public class TestHelpingService : IDisposable
 
         var createDate = DateTime.UtcNow;
 
-        // SQL script
-        var sql = @$"
-        INSERT INTO {DefaultSchema}.Events 
-        (Id, Title, Description, StartDate, Duration, Location, Status, CreateDate, OwnerId) 
-        VALUES 
-        ({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8});
-    ";
+        // SQL query
+        var sql = $"""
+                           INSERT INTO {DefaultSchema}.Events 
+                           (Id, Title, Description, StartDate, Duration, Location, Status, CreateDate, OwnerId) 
+                           VALUES 
+                           (@Id, @Title, @Description, @StartDate, @Duration, @Location, @Status, @CreateDate, @OwnerId);
+                   """;
 
-        // Execute SQL script
-        await context.Database.ExecuteSqlRawAsync(sql,
-            eventId,
-            title,
-            description,
-            startDate,
-            duration.Value.TotalSeconds,
-            location,
-            (byte)status,
-            createDate,
-            userId);
+        var parameters = new DynamicParameters();
+        parameters.Add("@Id", eventId, DbType.Guid);
+        parameters.Add("@Title", title, DbType.String);
+        parameters.Add("@Description", description, DbType.String);
+        parameters.Add("@StartDate", startDate, DbType.DateTime2);
+        parameters.Add("@Duration", duration, DbType.Time);
+        parameters.Add("@Location", location, DbType.String);
+        parameters.Add("@Status", status, DbType.Int16);
+        parameters.Add("@CreateDate", createDate, DbType.DateTime2);
+        parameters.Add("@OwnerId", userId, DbType.Guid);
 
+        await using var connection = new SqlConnection(_connectionStrings.DefaultConnection);
+        await connection.ExecuteAsync(sql, parameters);
         return eventId;
     }
 

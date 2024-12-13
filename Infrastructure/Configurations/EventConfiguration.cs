@@ -57,6 +57,16 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
             .WithOne()
             .HasForeignKey(a => a.EventId)
             .OnDelete(DeleteBehavior.ClientCascade);
+        
+        builder
+            .Metadata
+            .FindNavigation(nameof(Event.Attendees))
+            ?.SetPropertyAccessMode(PropertyAccessMode.Field);
+        
+        builder
+            .Metadata
+            .FindNavigation(nameof(Event.RSVPs))
+            ?.SetPropertyAccessMode(PropertyAccessMode.Field);
 
         // Indexes
         builder.HasIndex(e => e.OwnerId).HasDatabaseName("IX_Event_OwnerId");

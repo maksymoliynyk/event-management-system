@@ -1,6 +1,6 @@
 using Domain.Interfaces;
 
-namespace Application.Commands.Events.Delete;
+namespace Application.Commands.Events;
 
 public class DeleteEventByIdCommandHandler : IRequestHandler<DeleteEventByIdCommand, DeleteEventByIdResult>
 {

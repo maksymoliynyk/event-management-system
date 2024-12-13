@@ -17,6 +17,10 @@ public class AttendeeConfiguration : IEntityTypeConfiguration<Attendee>
 
         builder.Property(r => r.AttendeeId)
             .IsRequired();
+        
+        builder.HasOne(a => a.AttendeeUser)
+            .WithMany()
+            .HasForeignKey(a => a.AttendeeId);
 
         builder.HasIndex(a => new { a.EventId, a.AttendeeId }).HasDatabaseName("IX_Attendee_EventId_AttendeeId").IsUnique();
     }

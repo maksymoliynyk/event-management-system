@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Net.Http.Headers;
 
-using Application.Commands.Auth.Login;
-using Application.Commands.Auth.Register;
+using Application.Commands.Auth;
 
 using Domain.Entities.Users;
 using Domain.Interfaces;

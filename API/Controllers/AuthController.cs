@@ -1,8 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using Application.Commands.Auth.Login;
-using Application.Commands.Auth.Register;
+using Application.Commands.Auth;
 
 using MediatR;
 

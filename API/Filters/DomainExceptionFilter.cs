@@ -20,6 +20,10 @@ public class DomainExceptionFilter : IExceptionFilter
                 errorCode = onfe.ErrorCode, message = onfe.Message
             }),
             LoginException le => new BadRequestObjectResult(new { message = le.Message }),
+            ActionsNotAllowedException anae => new BadRequestObjectResult(new
+            {
+                errorCode = anae.ErrorCode, message = anae.Message
+            }),
             _ => context.Result
         };
     }

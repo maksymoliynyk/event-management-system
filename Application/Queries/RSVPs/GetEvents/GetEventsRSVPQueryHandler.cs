@@ -1,15 +1,6 @@
-using System;
-using System.Collections.Generic;
-
 using Application.Interfaces.Repositories;
-using Application.Models;
 
 namespace Application.Queries.RSVPs;
-
-public sealed record GetEventsRSVPQuery(Guid EventId, Guid OwnerId)
-    : IRequest<GetEventsRSVPQueryResult>;
-
-public sealed record GetEventsRSVPQueryResult(IEnumerable<RSVPQueryModel> RSVPs);
 
 public class GetEventsRSVPQueryHandler : IRequestHandler<GetEventsRSVPQuery, GetEventsRSVPQueryResult>
 {

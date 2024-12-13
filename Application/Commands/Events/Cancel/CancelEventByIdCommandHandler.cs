@@ -1,6 +1,6 @@
 using Domain.Interfaces;
 
-namespace Application.Commands.Events.Cancel;
+namespace Application.Commands.Events;
 
 public class CancelEventByIdCommandHandler : IRequestHandler<CancelEventByIdCommand, CancelEventByIdResult>
 {

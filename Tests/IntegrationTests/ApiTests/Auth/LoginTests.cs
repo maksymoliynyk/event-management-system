@@ -1,6 +1,6 @@
 ﻿using System.Net.Http.Headers;
 
-using Application.Commands.Auth.Login;
+using Application.Commands.Auth;
 
 using IntegrationTests.ApiTests.TestClient;
 
@@ -20,16 +20,16 @@ public class LoginTests : BaseApiTests
         var model = new LoginUserCommand(email, ValidPassword);
         var client = _fixture.CreateClient();
         (HttpStatusCode statusCode, string token) = await client.LoginUser(model);
-        
+
         StatusCodeIsSuccessful(statusCode);
-        
+
         string.IsNullOrWhiteSpace(token).Should().BeFalse();
-        
+
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         var isCorrectResult = await client.IsCorrectUser();
         StatusCodeIsSuccessful(isCorrectResult);
     }
-    
+
     [Fact]
     public async Task LoginUser_WithNotExistEmail_ShouldFail()
     {
@@ -41,7 +41,7 @@ public class LoginTests : BaseApiTests
 
         statusCode.Should().Be(HttpStatusCode.BadRequest);
     }
-    
+
     [Fact]
     public async Task LoginUser_WithWrongPassword_ShouldFail()
     {

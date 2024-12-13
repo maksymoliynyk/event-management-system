@@ -1,4 +1,4 @@
-namespace Application.Commands.RSVPs.Send;
+namespace Application.Commands.RSVPs;
 
 public class SendRSVPCommandValidator : AbstractValidator<SendRSVPCommand>
 {

@@ -26,7 +26,6 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Aggregates.Events.Attendee", b =>
                 {
                     b.Property<Guid>("AttendeeId")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("EventId")
@@ -323,11 +322,19 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Aggregates.Events.Attendee", b =>
                 {
+                    b.HasOne("Domain.Entities.Users.User", "AttendeeUser")
+                        .WithMany()
+                        .HasForeignKey("AttendeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Domain.Aggregates.Events.Event", null)
                         .WithMany("Attendees")
                         .HasForeignKey("EventId")
                         .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
+
+                    b.Navigation("AttendeeUser");
                 });
 
             modelBuilder.Entity("Domain.Aggregates.Events.Event", b =>
@@ -343,7 +350,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Aggregates.Events.RSVP", b =>
                 {
-                    b.HasOne("Domain.Aggregates.Events.Event", "Event")
+                    b.HasOne("Domain.Aggregates.Events.Event", null)
                         .WithMany("RSVPs")
                         .HasForeignKey("EventId")
                         .OnDelete(DeleteBehavior.ClientCascade)
@@ -354,8 +361,6 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Event");
 
                     b.Navigation("User");
                 });

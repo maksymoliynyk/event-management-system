@@ -10,6 +10,10 @@ using Application.Models;
 
 using Dapper;
 
+using Domain.Exceptions;
+
+using static Infrastructure.Constants.DbContextConstants;
+
 namespace Infrastructure.Repositories;
 
 public class EventQueryRepository : IEventQueryRepository
@@ -27,15 +31,15 @@ public class EventQueryRepository : IEventQueryRepository
         var whereClause = mode switch
         {
             EventQueryingMode.Owner => @"WHERE e.OwnerId = @UserId",
-            EventQueryingMode.Attendee => @"
-                INNER JOIN eventmanagement.Attendees a ON e.Id = a.EventId
+            EventQueryingMode.Attendee => $@"
+                 JOIN {DefaultSchema}.Attendees a ON e.Id = a.EventId
                 WHERE a.AttendeeId = @UserId",
             _ => throw new ArgumentOutOfRangeException(nameof(mode), "Invalid querying mode")
         };
 
         var query = $@"SELECT e.Id, e.Title, e.Description, e.StartDate, e.Duration, 
                        e.Location, e.Status, e.CreateDate
-                FROM eventmanagement.Events e
+                FROM {DefaultSchema}.Events e
                 {whereClause}";
 
         return await _dbConnection.QueryAsync<EventQueryModel>(query,
@@ -44,49 +48,57 @@ public class EventQueryRepository : IEventQueryRepository
 
     public async Task<EventQueryModel> GetEventById(Guid eventId, Guid userId, CancellationToken ct)
     {
-        var sql = @"
+        var sql = $@"
         SELECT e.Id, e.Title, e.Description, e.StartDate, e.Duration, 
                e.Location, e.Status, e.CreateDate
-        FROM eventmanagement.Events e
-        LEFT JOIN eventmanagement.Attendees a ON e.Id = a.EventId AND a.AttendeeId = @UserId
-        WHERE e.Id = @EventId AND (e.OwnerId = @UserId OR a.AttendeeId = @UserId)";
+        FROM {DefaultSchema}.Events e
+        LEFT JOIN {DefaultSchema}.RSVPs r ON e.Id = r.EventId AND r.UserId = @UserId
+        WHERE e.Id = @EventId AND (e.OwnerId = @UserId OR r.UserId = @UserId)";
 
-        return await _dbConnection.QuerySingleOrDefaultAsync<EventQueryModel>(sql,
+        var result = await _dbConnection.QueryFirstOrDefaultAsync<EventQueryModel>(sql,
             new { EventId = eventId, UserId = userId });
+        if (result == null)
+        {
+            throw new ObjectNotFoundException(EntitiesErrorType.Event);
+        }
+
+        return result;
     }
 
     public async Task<IEnumerable<AttendeeQueryModel>> GetAllAttendeesByEvent(Guid eventId, Guid ownerId,
         CancellationToken ct)
     {
-        var sql = @"
+        var sql = $@"
             SELECT u.Email AS AttendeeEmail, a.EventId
-            FROM eventmanagement.Attendees a
-            INNER JOIN eventmanagement.AspNetUsers u ON a.AttendeeId = u.Id
-            WHERE a.EventId;";
+            FROM {DefaultSchema}.Attendees a
+                JOIN {DefaultSchema}.Events e on a.EventId = e.Id
+                JOIN {DefaultSchema}.AspNetUsers u ON a.AttendeeId = u.Id
+            WHERE a.EventId = @eventId and e.OwnerId = @OwnerId";
 
         return await _dbConnection.QueryAsync<AttendeeQueryModel>(sql,
-            new { EventId = eventId });
+            new { EventId = eventId, OwnerId = ownerId });
     }
 
     public async Task<IEnumerable<RSVPQueryModel>> GetAllInvitesByEvent(Guid eventId, Guid ownerId,
         CancellationToken ct)
     {
-        var sql = @"
+        var sql = $@"
             SELECT u.Email AS InviteeEmail, r.EventId, r.Status AS RSVPStatus
-            FROM eventmanagement.RSVPs r
-            INNER JOIN eventmanagement.AspNetUsers u ON r.UserId = u.Id
-            WHERE r.EventId = @EventId";
+            FROM {DefaultSchema}.RSVPs r
+                JOIN {DefaultSchema}.Events e on r.EventId = e.Id
+                JOIN {DefaultSchema}.AspNetUsers u ON r.UserId = u.Id
+            WHERE r.EventId = @EventId and e.OwnerId = @OwnerId";
 
         return await _dbConnection.QueryAsync<RSVPQueryModel>(sql,
-            new { EventId = eventId });
+            new { EventId = eventId, OwnerId = ownerId });
     }
 
     public async Task<IEnumerable<RSVPQueryModel>> GetAllInvitesByUser(Guid userId, CancellationToken ct)
     {
-        var sql = @"
+        var sql = $@"
             SELECT u.Email AS InviteeEmail, r.EventId, r.Status AS RSVPStatus
-            FROM eventmanagement.RSVPs r
-            INNER JOIN eventmanagement.AspNetUsers u ON r.UserId = u.Id
+            FROM {DefaultSchema}.RSVPs r
+                JOIN {DefaultSchema}.AspNetUsers u ON r.UserId = u.Id
             WHERE r.UserId = @UserId";
 
         return await _dbConnection.QueryAsync<RSVPQueryModel>(sql,

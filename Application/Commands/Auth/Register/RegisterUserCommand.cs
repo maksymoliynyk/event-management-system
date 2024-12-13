@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 using Microsoft.AspNetCore.Identity;
 
-namespace Application.Commands.Auth.Register;
+namespace Application.Commands.Auth;
 
 public sealed record RegisterUserCommand(
     string Email,

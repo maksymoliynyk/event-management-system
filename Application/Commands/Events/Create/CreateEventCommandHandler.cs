@@ -3,7 +3,7 @@
 using Domain.Aggregates.Events;
 using Domain.Interfaces;
 
-namespace Application.Commands.Events.Create;
+namespace Application.Commands.Events;
 
 public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, CreateEventResult>
 {

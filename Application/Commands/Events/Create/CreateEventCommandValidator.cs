@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Application.Commands.Events.Create;
+namespace Application.Commands.Events;
 
 public class CreateEventCommandValidator : AbstractValidator<CreateEventCommand>
 {

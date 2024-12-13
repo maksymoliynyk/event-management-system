@@ -32,7 +32,7 @@ public class IdentityService : IIdentityService
 
     public async Task<string> LoginUserAsync(string email, string password, CancellationToken ct)
     {
-        var user = await GetUserByEmail(email);
+        var user = await FindByEmail(email);
 
         if (!await _userManager.CheckPasswordAsync(user, password))
         {
@@ -45,7 +45,7 @@ public class IdentityService : IIdentityService
     public async Task<IdentityResult> RegisterUserAsync(string email, string password, string firstName,
         string lastName, CancellationToken ct)
     {
-        if (await GetUserByEmail(email) != null)
+        if (await FindByEmail(email) != null)
         {
             throw new ObjectAlreadyExistException(EntitiesErrorType.User);
         }
@@ -62,8 +62,16 @@ public class IdentityService : IIdentityService
 
     public async Task<User> GetUserByEmail(string email)
     {
-        return await _userManager.FindByEmailAsync(email);
+        var user = await FindByEmail(email);
+        if (user == null)
+        {
+            throw new ObjectNotFoundException(EntitiesErrorType.User);
+        }
+
+        return user;
     }
+
+    private async Task<User> FindByEmail(string email) => await _userManager.FindByEmailAsync(email);
 
     public void Dispose()
     {

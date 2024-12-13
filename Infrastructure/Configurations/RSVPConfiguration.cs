@@ -33,10 +33,6 @@ public class RSVPConfiguration : IEntityTypeConfiguration<RSVP>
             .IsRequired();
 
         // Navigation Properties
-        builder.HasOne(r => r.Event)
-            .WithMany(e => e.RSVPs)
-            .HasForeignKey(r => r.EventId);
-
         builder.HasOne(r => r.User)
             .WithMany()
             .HasForeignKey(r => r.UserId);

@@ -3,13 +3,18 @@ using System.Linq;
 
 using Domain.Entities.Users;
 using Domain.Enums;
+using Domain.Exceptions;
 
 namespace Domain.Aggregates.Events;
 
 public class Event
 {
-    private readonly List<RSVP> _rsvps = [];
+    // this field has strange naming convention to match backing field conventions for EF configurations
+    private readonly List<RSVP> _rSVPs = [];
     private readonly List<Attendee> _attendees = [];
+    
+    public static readonly string AttendeesBackingFieldName = nameof(_attendees);
+    public static readonly string RsvpsBackingFieldName = nameof(_rSVPs);
 
     public Guid Id { get; private set; }
     public string Title { get; private set; }
@@ -23,8 +28,8 @@ public class Event
 
     // Navigation properties
     public User Owner { get; }
-    public IReadOnlyCollection<RSVP> RSVPs => _rsvps.AsReadOnly();
-    public IReadOnlyCollection<Attendee> Attendees => _attendees.AsReadOnly();
+    public ICollection<RSVP> RSVPs => _rSVPs.AsReadOnly();
+    public ICollection<Attendee> Attendees => _attendees.AsReadOnly();
 
     public static Event CreateEvent(string title, string description, TimeSpan duration, string location, Guid ownerId,
         DateTime startDate)
@@ -47,48 +52,60 @@ public class Event
 
     public void CancelEvent()
     {
-        if (Status == EventStatus.Cancelled)
-        {
-            throw new Exception("Event already cancelled");
-        }
-
-        if (StartDate.Add(Duration) < DateTime.UtcNow || Status == EventStatus.Finished)
-        {
-            throw new Exception("Event already ended");
-        }
+        IsEventActive();
 
         Status = EventStatus.Cancelled;
     }
 
     public Guid CreateRSVP(Guid inviteeId)
     {
+        IsEventActive();
+
         if (inviteeId == OwnerId)
         {
-            throw new Exception("Owner cannot be invited");
+            throw new ActionsNotAllowedException(EntitiesErrorType.RSVP, "Owner cannot be invited");
         }
 
-        if (Status == EventStatus.Cancelled)
+        if (RSVPs.FirstOrDefault(i => i.UserId == inviteeId) != null)
         {
-            throw new Exception("Event already cancelled");
-        }
-
-        if (StartDate.Add(Duration) < DateTime.UtcNow || Status == EventStatus.Finished)
-        {
-            throw new Exception("Event already ended");
-        }
-
-        if (_rsvps.FirstOrDefault(i => i.UserId == inviteeId) != null)
-        {
-            throw new Exception("User already invited");
+            throw new ActionsNotAllowedException(EntitiesErrorType.RSVP, "User already invited");
         }
 
         var rsvp = new RSVP(Id, inviteeId);
-        _rsvps.Add(rsvp);
+        _rSVPs.Add(rsvp);
 
         return rsvp.Id;
     }
 
-    public void CreateAttendee(Guid userId)
+    private void IsEventActive()
+    {
+        if (Status == EventStatus.Cancelled)
+        {
+            throw new ActionsNotAllowedException(EntitiesErrorType.Event, "Event already cancelled");
+        }
+
+        if (StartDate.Add(Duration) < DateTime.UtcNow || Status == EventStatus.Finished)
+        {
+            throw new ActionsNotAllowedException(EntitiesErrorType.Event, "Event already ended");
+        }
+    }
+
+    public void RespondToRsvp(RSVPStatus status, Guid userId)
+    {
+        var rsvp = RSVPs.FirstOrDefault(r => r.UserId == userId);
+        if (rsvp == null)
+        {
+            throw new ObjectNotFoundException(EntitiesErrorType.RSVP);
+        }
+
+        rsvp.ChangeStatus(status);
+        if (status == RSVPStatus.Accepted)
+        {
+            CreateAttendee(userId);
+        }
+    }
+
+    private void CreateAttendee(Guid userId)
     {
         var attendee = new Attendee(Id, userId);
         _attendees.Add(attendee);

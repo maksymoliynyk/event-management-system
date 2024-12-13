@@ -1,4 +1,4 @@
-namespace Application.Commands.Auth.Register
+namespace Application.Commands.Auth
 {
     public class RegisterUserCommandValidator : AbstractValidator<RegisterUserCommand>
     {

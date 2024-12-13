@@ -1,5 +1,6 @@
 using Domain.Entities.Users;
 using Domain.Enums;
+using Domain.Exceptions;
 
 namespace Domain.Aggregates.Events;
 
@@ -25,16 +26,11 @@ public class RSVP
         CreateDate = DateTime.UtcNow;
     }
 
-    public void ChangeStatus(RSVPStatus status, Guid userId)
+    internal void ChangeStatus(RSVPStatus status)
     {
-        if (UserId != userId)
+        if (status == RSVPStatus.Pending || Status != RSVPStatus.Pending)
         {
-            throw new Exception("Cannot performed by not owner");
-        }
-
-        if (Status == RSVPStatus.Pending)
-        {
-            throw new Exception("Invalid status");
+            throw new ActionsNotAllowedException(EntitiesErrorType.RSVP, "Invalid status");
         }
 
         Status = status;

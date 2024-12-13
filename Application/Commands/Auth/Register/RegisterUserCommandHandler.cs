@@ -1,6 +1,6 @@
 ﻿using Domain.Entities.Users;
 
-namespace Application.Commands.Auth.Register;
+namespace Application.Commands.Auth;
 
 public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, RegisterUserResult>
 {

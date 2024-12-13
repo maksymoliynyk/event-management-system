@@ -1,6 +1,6 @@
 ﻿using Domain.Entities.Users;
 
-namespace Application.Commands.Auth.Login;
+namespace Application.Commands.Auth;
 
 public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, LoginUserResult>
 {

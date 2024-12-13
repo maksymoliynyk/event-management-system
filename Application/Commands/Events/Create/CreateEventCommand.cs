@@ -1,6 +1,6 @@
 using System;
 
-namespace Application.Commands.Events.Create;
+namespace Application.Commands.Events;
 
 public sealed record CreateEventCommand(
     string Title,
