@@ -23,13 +23,13 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 7.0.x
+        dotnet-version: 8.0.x
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore
     - name: Verify project file path
-      run: ls -al ./UnitTests
+      run: ls -al ./Tests/ArchitectureTests
     - name: Test
-      working-directory: ./UnitTests
-      run: dotnet test UnitTests.csproj --no-build --verbosity normal
+      working-directory: ./Tests/ArchitectureTests
+      run: dotnet test ArchitectureTests.csproj --no-build --verbosity normal

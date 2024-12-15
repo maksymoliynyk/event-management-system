@@ -1,0 +1,24 @@
+﻿services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: test_sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Password1234
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - test_sql_data:/var/opt/mssql
+
+  tests:
+    build:
+      context: .
+      dockerfile: ./API/Dockerfile.tests.integration
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Test
+    depends_on:
+      - db
+    entrypoint: [ "dotnet", "test", "--no-restore", "--logger:trx" ]
+volumes:
+  test_sql_data:
