@@ -1,0 +1,33 @@
+﻿services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Password1234
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+  
+  migrate:
+    build:
+      context: .
+      dockerfile: ./scripts/Dockerfile
+    depends_on:
+      - db
+  
+  api:
+    build:
+      context: .
+      dockerfile: ./API/Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - db
+
+volumes:
+  sql_data:
