@@ -1,17 +1,26 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API", "API\API.csproj", "{0DD6F92E-4243-4E40-A4BA-57E24C289183}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts", "Contracts\Contracts.csproj", "{A4ED14E5-CA73-4C3F-94CF-787C6A0D0235}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{4FD95F71-228F-4682-AE70-B1BC623E2197}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "IntegrationTests\IntegrationTests.csproj", "{2B4CE2B7-3B06-4311-A4BE-16AFA998C07E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{6170ACD3-AE4C-4485-9906-C86216D25C16}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{3CD46CE8-E0AE-45B0-82FA-5AC8CF915537}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "Application\Application.csproj", "{1BC8B803-DD2E-4F25-A437-6FFD5F08AF9C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{F81AF384-E253-4E5A-BA0C-CAB4B89CB1D8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchitectureTests", "Tests\ArchitectureTests\ArchitectureTests.csproj", "{171AC65A-FF2C-40E6-8165-73F889D55EBF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "Tests\IntegrationTests\IntegrationTests.csproj", "{471FD436-3571-40A3-B227-2DCF50AE7518}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2A145BEB-60C9-44CD-AC14-09CC3416F708}"
+	ProjectSection(SolutionItems) = preProject
+		docker-compose.dev.yaml = docker-compose.dev.yaml
+		docker-compose.test.integration.yaml = docker-compose.test.integration.yaml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,10 +35,6 @@ Global
 		{0DD6F92E-4243-4E40-A4BA-57E24C289183}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0DD6F92E-4243-4E40-A4BA-57E24C289183}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0DD6F92E-4243-4E40-A4BA-57E24C289183}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A4ED14E5-CA73-4C3F-94CF-787C6A0D0235}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A4ED14E5-CA73-4C3F-94CF-787C6A0D0235}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A4ED14E5-CA73-4C3F-94CF-787C6A0D0235}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A4ED14E5-CA73-4C3F-94CF-787C6A0D0235}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4FD95F71-228F-4682-AE70-B1BC623E2197}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4FD95F71-228F-4682-AE70-B1BC623E2197}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4FD95F71-228F-4682-AE70-B1BC623E2197}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -42,5 +47,25 @@ Global
 		{3CD46CE8-E0AE-45B0-82FA-5AC8CF915537}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3CD46CE8-E0AE-45B0-82FA-5AC8CF915537}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3CD46CE8-E0AE-45B0-82FA-5AC8CF915537}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6170ACD3-AE4C-4485-9906-C86216D25C16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6170ACD3-AE4C-4485-9906-C86216D25C16}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6170ACD3-AE4C-4485-9906-C86216D25C16}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6170ACD3-AE4C-4485-9906-C86216D25C16}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1BC8B803-DD2E-4F25-A437-6FFD5F08AF9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1BC8B803-DD2E-4F25-A437-6FFD5F08AF9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1BC8B803-DD2E-4F25-A437-6FFD5F08AF9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1BC8B803-DD2E-4F25-A437-6FFD5F08AF9C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{171AC65A-FF2C-40E6-8165-73F889D55EBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{171AC65A-FF2C-40E6-8165-73F889D55EBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{171AC65A-FF2C-40E6-8165-73F889D55EBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{171AC65A-FF2C-40E6-8165-73F889D55EBF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{471FD436-3571-40A3-B227-2DCF50AE7518}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{471FD436-3571-40A3-B227-2DCF50AE7518}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{471FD436-3571-40A3-B227-2DCF50AE7518}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{471FD436-3571-40A3-B227-2DCF50AE7518}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{171AC65A-FF2C-40E6-8165-73F889D55EBF} = {F81AF384-E253-4E5A-BA0C-CAB4B89CB1D8}
+		{471FD436-3571-40A3-B227-2DCF50AE7518} = {F81AF384-E253-4E5A-BA0C-CAB4B89CB1D8}
 	EndGlobalSection
 EndGlobal

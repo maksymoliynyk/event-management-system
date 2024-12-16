@@ -1,52 +1,31 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using API.Extensions;
-
-using Contracts.RequestModels;
-
-using Domain.Commands.RSVPCommands;
-using Domain.Queries.RSVPQueries;
+using Application.Queries.RSVPs;
 
 using MediatR;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("invites")]
     [Authorize]
-    public class RSVPController : ControllerBase
+    public class RSVPController : BaseController
     {
-        private readonly IMediator _mediator;
-        public RSVPController(IMediator mediator)
+        public RSVPController(ILogger<RSVPController> logger, ISender sender) : base(logger, sender)
         {
-            _mediator = mediator;
         }
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetRSVPById([FromRoute] string id, CancellationToken cancellationToken = default)
+
+        [HttpGet]
+        public async Task<IActionResult> GetRSVPsByUser(CancellationToken cancellationToken)
         {
-            GetRSVPByIdQuery query = new()
-            {
-                RSVPId = id,
-                UserId = User.GetUserIdFromJWT()
-            };
-            GetRSVPByIdResult result = await _mediator.Send(query, cancellationToken);
-            return Ok(result.RSVP);
-        }
-        [HttpPatch("{id}")]
-        public async Task<IActionResult> ChangeRSVPStatus([FromRoute] string id, [FromBody] RSVPAcceptRequest request, CancellationToken cancellationToken = default)
-        {
-            UpdateRSVPStatusCommand command = new()
-            {
-                RSVPAccepted = request.AcceptInvite,
-                RSVPId = id,
-                UserId = User.GetUserIdFromJWT()
-            };
-            _ = await _mediator.Send(command, cancellationToken);
-            return NoContent();
+            var query = new GetUsersRSVPQuery(GetUserId());
+            var result = await _sender.Send(query, cancellationToken);
+            return Ok(result.RSVPs);
         }
     }
 }
