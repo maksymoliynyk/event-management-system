@@ -33,7 +33,7 @@ builder.Configuration
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
 //* Extension Methods
-builder.Services.ConfigureCORS();
+builder.Services.ConfigureCors();
 
 builder.Services.AddCustomOptions()
     .AddIdentity(builder.Configuration)
@@ -63,10 +63,3 @@ app.UseMiddleware<ValidationExceptionHandlingMiddleware>();
 app.MapControllers();
 
 app.Run();
-
-namespace API
-{
-    public partial class Program
-    {
-    }
-}

@@ -4,10 +4,6 @@
 name: .NET
 
 on:
-  push:
-    branches:
-      - "main"
-      - "dev-improvements"
   pull_request:
     branches:
       - "main"
